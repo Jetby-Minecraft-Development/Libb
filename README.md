@@ -195,6 +195,7 @@ ctx.get(MyInterface.class);
   <groupId>me.jetby</groupId>
   <artifactId>Libb</artifactId>
   <version>1.0</version>
+  <scope>provided</scope>
 </dependency>
 ```
 ###### GRADLE
@@ -208,6 +209,6 @@ repositories {
 ```
 ```gradle
 dependencies {
-    implementation "me.jetby:Libb:1.0"
+    compileOnly "me.jetby:Libb:1.0"
 }
 ```
