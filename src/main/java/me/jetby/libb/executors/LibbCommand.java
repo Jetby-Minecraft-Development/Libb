@@ -1,6 +1,7 @@
 package me.jetby.libb.executors;
 
 import me.jetby.libb.Libb;
+import me.jetby.libb.gui.parser.ParsedGui;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +23,15 @@ public class LibbCommand implements CommandExecutor {
             if (args[0].equalsIgnoreCase("reload")) {
                 plugin.menusLoader.load();
                 player.sendMessage("successfully reloaded");
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("test")) {
+                ParsedGui gui = new ParsedGui(player, Libb.PARSED_GUIS.get(args[1]))
+                        .setItemHandler("test", (event, section) -> {
+                            event.setCancelled(true);
+                            event.getWhoClicked().sendMessage(section.getString("test"));
+                        });
+                gui.getGui().open(player);
                 return true;
             }
 

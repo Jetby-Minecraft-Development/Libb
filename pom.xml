@@ -50,6 +50,13 @@
         </resources>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>jetby-repo</id>
+            <url>http://api.jetby.space/</url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>papermc-repo</id>

@@ -10,6 +10,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -31,8 +32,6 @@ public class ItemWrapper {
     private boolean enchanted;
     private List<ItemFlag> flags;
     private Consumer<InventoryClickEvent> onClick;
-    private ItemSnapshot snapshot;
-
 
     public ItemWrapper(@NotNull final ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -55,14 +54,6 @@ public class ItemWrapper {
 
     public final void onClick(Consumer<InventoryClickEvent> onClick) {
         this.onClick = onClick;
-    }
-
-    public final ItemSnapshot snapshot() {
-        return snapshot;
-    }
-
-    public final void snapshot(ItemSnapshot snapshot) {
-        this.snapshot = snapshot;
     }
 
     public final List<Integer> slots() {
@@ -105,7 +96,7 @@ public class ItemWrapper {
         this.displayName = displayName;
     }
 
-    public final void displayName(String displayName) {
+    public final void setDisplayName(String displayName) {
         this.displayName = Libb.MINI_MESSAGE.deserialize("<italic:false>" + displayName);
         ItemMeta meta = itemStack.getItemMeta();
         meta.displayName(this.displayName);
@@ -168,6 +159,48 @@ public class ItemWrapper {
     public final void amount(int amount) {
         this.amount = amount;
     }
+    private String rawDisplayName;
+    private List<String> rawLore;
+
+    public final void setRawDisplayName(String rawDisplayName) {
+        this.rawDisplayName = rawDisplayName;
+    }
+
+    public final void setRawLore(List<String> rawLore) {
+        this.rawLore = rawLore;
+    }
+
+    public final void refresh(Player player, Inventory inventory) {
+        if (itemStack == null) return;
+
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null) return;
+
+        if (rawDisplayName != null) {
+            String parsed = PlaceholderAPI.setPlaceholders(player, rawDisplayName);
+            this.displayName = Libb.MINI_MESSAGE.deserialize("<italic:false>" + parsed);
+            meta.displayName(this.displayName);
+        }
+
+        if (rawLore != null) {
+            List<Component> parsed = new ArrayList<>();
+            for (String line : rawLore) {
+                parsed.add(Libb.MINI_MESSAGE.deserialize(
+                        "<italic:false>" + PlaceholderAPI.setPlaceholders(player, line)
+                ));
+            }
+            this.lore = parsed;
+            meta.lore(this.lore);
+        }
+
+        itemStack.setItemMeta(meta);
+
+        if (slots != null && inventory != null) {
+            for (int slot : slots) {
+                inventory.setItem(slot, itemStack);
+            }
+        }
+    }
 
     public static ItemWrapper.Builder builder(@NotNull Material material) {
         return new ItemWrapper.Builder(material);
@@ -184,8 +217,17 @@ public class ItemWrapper {
         private boolean enchanted;
         private List<ItemFlag> flags;
         private Consumer<InventoryClickEvent> onClick;
-        private ItemSnapshot snapshot;
 
+        private String rawDisplayName;
+        private List<String> rawLore;
+
+        public final void setRawDisplayName(String rawDisplayName) {
+            this.rawDisplayName = rawDisplayName;
+        }
+
+        public final void setRawLore(List<String> rawLore) {
+            this.rawLore = rawLore;
+        }
         private Builder(@NotNull Material material) {
             this.material = material;
         }
@@ -239,10 +281,6 @@ public class ItemWrapper {
             return this;
         }
 
-        public ItemWrapper.Builder snapshot(ItemSnapshot snapshot) {
-            this.snapshot = snapshot;
-            return this;
-        }
 
         public ItemWrapper build() {
             ItemWrapper wrapper = new ItemWrapper(material, amount);
@@ -256,75 +294,41 @@ public class ItemWrapper {
             wrapper.itemStack = itemStack;
             wrapper.flags = flags;
             wrapper.onClick = onClick;
-            wrapper.snapshot = snapshot;
 
             return wrapper;
         }
 
+        public final void refresh(Player player, Inventory inventory) {
+            if (itemStack == null) return;
 
-    }
-
-    @RequiredArgsConstructor
-    @Getter
-    public static class ItemSnapshot {
-        private final List<Integer> slots;
-        private final int amount;
-        private final ItemStack itemStack;
-        private final Material material;
-        private final Component displayName;
-        private final List<Component> lore;
-        private final int customModelData;
-        private final boolean enchanted;
-        private final List<ItemFlag> flags;
-        private final Consumer<InventoryClickEvent> onClick;
-
-        public ItemSnapshot(ItemWrapper wrapper) {
-
-            amount = wrapper.amount;
-            displayName = wrapper.displayName;
-            lore = wrapper.lore;
-            slots = wrapper.slots;
-            customModelData = wrapper.customModelData;
-            enchanted = wrapper.enchanted;
-            material = wrapper.material;
-            itemStack = wrapper.itemStack;
-            flags = wrapper.flags;
-            onClick = wrapper.onClick;
-        }
-        public ItemStack build(Player player) {
-
-            String rawDisplayName = Libb.MINI_MESSAGE.serialize(displayName);
-            List<String> rawLore = new ArrayList<>();
-            for (Component line : lore) {
-                rawLore.add(Libb.MINI_MESSAGE.serialize(line));
-            }
-            ItemStack itemStack = new ItemStack(material);
             ItemMeta meta = itemStack.getItemMeta();
+            if (meta == null) return;
 
-            if (meta != null) {
-
-                meta.displayName(
-                        MiniMessage.miniMessage().deserialize(
-                                PlaceholderAPI.setPlaceholders(player, rawDisplayName)
-                        )
-                );
-
-                List<Component> loreComponents = new ArrayList<>();
-
-                for (String line : rawLore) {
-                    loreComponents.add(
-                            MiniMessage.miniMessage().deserialize(
-                                    PlaceholderAPI.setPlaceholders(player, line)
-                            )
-                    );
-                }
-
-                meta.lore(loreComponents);
-
-                itemStack.setItemMeta(meta);
+            if (rawDisplayName != null) {
+                String parsed = PlaceholderAPI.setPlaceholders(player, rawDisplayName);
+                this.displayName = Libb.MINI_MESSAGE.deserialize("<italic:false>" + parsed);
+                meta.displayName(this.displayName);
             }
 
-            return itemStack;
+            if (rawLore != null) {
+                List<Component> parsed = new ArrayList<>();
+                for (String line : rawLore) {
+                    parsed.add(Libb.MINI_MESSAGE.deserialize(
+                            "<italic:false>" + PlaceholderAPI.setPlaceholders(player, line)
+                    ));
+                }
+                this.lore = parsed;
+                meta.lore(this.lore);
+            }
+
+            itemStack.setItemMeta(meta);
+
+            // Обновляем предмет во всех слотах инвентаря
+            if (slots != null && inventory != null) {
+                for (int slot : slots) {
+                    inventory.setItem(slot, itemStack);
+                }
+            }
         }
 
     }

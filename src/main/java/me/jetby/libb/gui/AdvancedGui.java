@@ -17,15 +17,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AdvancedGui implements InventoryHolder {
-    @Getter
+
     private final Inventory inventory;
     @Getter
     private final Map<String, ItemWrapper> items = new HashMap<>();
@@ -35,15 +34,21 @@ public class AdvancedGui implements InventoryHolder {
     private Consumer<InventoryCloseEvent> onClose;
     public Player player;
 
-    public AdvancedGui(Inventory inventory) {
+    private final Map<String, Function<Player, String>> placeholders = new LinkedHashMap<>();
+
+
+    public AdvancedGui(@NotNull Inventory inventory) {
         this.inventory = inventory;
     }
+
     public AdvancedGui(String title) {
         this.inventory = Bukkit.createInventory(this, InventoryType.CHEST, title);
     }
+
     public AdvancedGui(String title, int size) {
         this.inventory = Bukkit.createInventory(this, size, title);
     }
+
     public AdvancedGui(String title, InventoryType inventoryType) {
         this.inventory = Bukkit.createInventory(this, inventoryType, title);
     }
@@ -51,63 +56,19 @@ public class AdvancedGui implements InventoryHolder {
     public AdvancedGui(Component title) {
         this.inventory = Bukkit.createInventory(this, InventoryType.CHEST, title);
     }
+
     public AdvancedGui(Component title, int size) {
         this.inventory = Bukkit.createInventory(this, size, title);
     }
-    public AdvancedGui(Component title, InventoryType inventoryType) {
+
+    public AdvancedGui(Component title, @NotNull InventoryType inventoryType) {
         this.inventory = Bukkit.createInventory(this, inventoryType, title);
     }
 
-    public void restore(Player player, @NotNull String key) {
-        ItemWrapper wrapper = items.get(key);
-        if (wrapper==null) return;
 
-        ItemStack itemStack = wrapper.snapshot().getItemStack();
-        if (itemStack==null) {
-            itemStack = new ItemStack(wrapper.material());
-            ItemWrapper restoredWrapper = new ItemWrapper(itemStack);
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                meta.displayName(
-                        Libb.MINI_MESSAGE.deserialize(
-                                PlaceholderAPI.setPlaceholders(player,
-                                        Libb.MINI_MESSAGE.serialize(restoredWrapper.displayName())
-                                )));
-                List<Component> lore = new ArrayList<>();
-                for (Component str : restoredWrapper.lore()) {
-                    lore.add(Libb.MINI_MESSAGE.deserialize(
-                            PlaceholderAPI.setPlaceholders(player,
-                                    Libb.MINI_MESSAGE.serialize(str)
-                            )));
-                }
-                meta.lore(lore);
-                meta.setCustomModelData(restoredWrapper.customModelData());
-                if (restoredWrapper.enchanted()) {
-                    meta.addEnchant(Enchantment.OXYGEN, 1, false);
-                }
-                if (restoredWrapper.flags() != null && !restoredWrapper.flags().isEmpty()) {
-                    for (ItemFlag flag : restoredWrapper.flags()) {
-                        meta.addItemFlags(flag);
-                    }
-                }
-                meta.getPersistentDataContainer().set(Keys.GUI_ITEM, PersistentDataType.STRING, key);
-                itemStack.setItemMeta(meta);
-            }
-            restoredWrapper.itemStack(itemStack);
-        }
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.getPersistentDataContainer().set(Keys.GUI_ITEM, PersistentDataType.STRING, key);
-        itemStack.setItemMeta(meta);
-
-        for (int slot : wrapper.slots()) {
-            inventory.setItem(slot, itemStack);
-        }
-
-        items.put(key, wrapper);
-    }
 
     public void setItem(@NotNull String key, @NotNull ItemWrapper wrapper) {
-        if (wrapper.slots()==null) return;
+        if (wrapper.slots() == null) return;
 
         ItemStack itemStack = wrapper.itemStack();
         if (itemStack == null) {
@@ -151,19 +112,46 @@ public class AdvancedGui implements InventoryHolder {
     public InventoryHolder getHolder() {
         return this;
     }
-    public Consumer<InventoryClickEvent> onClick() {return onClick;}
-    public Consumer<InventoryDragEvent> onDrag() {return onDrag;}
-    public Consumer<InventoryOpenEvent> onOpen() {return onOpen;}
-    public Consumer<InventoryCloseEvent> onClose() {return onClose;}
+
+    @Nullable
+    public Consumer<InventoryClickEvent> onClick() {
+        return onClick;
+    }
+
+    @Nullable
+    public Consumer<InventoryDragEvent> onDrag() {
+        return onDrag;
+    }
+
+    @Nullable
+    public Consumer<InventoryOpenEvent> onOpen() {
+        return onOpen;
+    }
+
+    @Nullable
+    public Consumer<InventoryCloseEvent> onClose() {
+        return onClose;
+    }
+
+    public void onClick(Consumer<InventoryClickEvent> event) {
+        this.onClick = event;
+    }
+
     public void onDrag(Consumer<InventoryDragEvent> event) {
         this.onDrag = event;
     }
+
     public void onOpen(Consumer<InventoryOpenEvent> event) {
         this.onOpen = event;
     }
+
     public void onClose(Consumer<InventoryCloseEvent> event) {
         this.onClose = event;
     }
 
 
+    @Override
+    public @NotNull Inventory getInventory() {
+        return inventory;
+    }
 }

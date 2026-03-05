@@ -1,6 +1,5 @@
 package me.jetby.libb;
 
-import me.clip.placeholderapi.PlaceholderAPI;
 import me.jetby.libb.configuration.MenusLoader;
 import me.jetby.libb.executors.LibbCommand;
 import me.jetby.libb.gui.CommandRegistrar;
@@ -35,6 +34,7 @@ public final class Libb extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
         new Test().register();
+
     }
 
     @Override

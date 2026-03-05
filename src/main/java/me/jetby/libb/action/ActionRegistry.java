@@ -48,8 +48,7 @@ public final class ActionRegistry {
         register(LIBB, "open",                 new Open());
         register(LIBB, "title",                new Title());
         register(LIBB, "sound",                new Sound());
-        register(LIBB, "rebuild",              (ctx, text) -> {});
-        register(LIBB, "refresh",              (ctx, text) -> {});
+        register(LIBB, "refresh",              new Refresh());
     }
 
     /**

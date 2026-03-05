@@ -20,7 +20,8 @@ import java.util.UUID;
 
 public class SkullCreator {
 
-    private SkullCreator() {}
+    private SkullCreator() {
+    }
 
     private static boolean warningPosted = false;
     private static boolean mutateWithNew = false;
@@ -30,6 +31,7 @@ public class SkullCreator {
 
     /**
      * Creates a player skull, should work in both legacy and new Bukkit APIs.
+     *
      * @return Skull ItemStack
      */
     public static ItemStack createSkull() {
@@ -95,6 +97,7 @@ public class SkullCreator {
 
         return item;
     }
+
     /**
      * Modifies a skull to use the skin at the given Mojang URL.
      *
@@ -120,10 +123,9 @@ public class SkullCreator {
         notNull(item, "item");
         notNull(base64, "base64");
 
-        if (!(item.getItemMeta() instanceof SkullMeta)) {
+        if (!(item.getItemMeta() instanceof SkullMeta meta)) {
             return null;
         }
-        SkullMeta meta = (SkullMeta) item.getItemMeta();
         if (mutateWithNew || !mutateItemMeta(meta, base64)) {
             mutateNewItemMeta(meta, base64);
             mutateWithNew = true;
@@ -228,6 +230,7 @@ public class SkullCreator {
                 Bukkit.getLogger().warning("SKULLCREATOR API - Using the legacy bukkit API with 1.13+ bukkit versions is not supported!");
                 warningPosted = true;
             }
-        } catch (NoSuchFieldException | IllegalArgumentException ignored) {}
+        } catch (NoSuchFieldException | IllegalArgumentException ignored) {
+        }
     }
 }
