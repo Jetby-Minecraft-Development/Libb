@@ -43,14 +43,14 @@ Items:
 
     view_requirements:
       check1:
-        if: ""
+        if: "5 > 10"
         then:
-          - displayName: "Another name"
+          - display_name: "Another name"
           - lore:
               - "Red"
               - "----------"
-          - lore[2]: "Yellow"
-
+          - slot: 12
+          - lore[1]: "Yellow"
 
     on_click:
       any:

@@ -49,6 +49,7 @@ public final class ActionRegistry {
         register(LIBB, "title",                new Title());
         register(LIBB, "sound",                new Sound());
         register(LIBB, "refresh",              new Refresh());
+        register(LIBB, "delay",              new Delay());
     }
 
     /**

@@ -1,5 +1,6 @@
 package me.jetby.libb;
 
+import lombok.Getter;
 import me.jetby.libb.configuration.MenusLoader;
 import me.jetby.libb.executors.LibbCommand;
 import me.jetby.libb.gui.CommandRegistrar;
@@ -21,8 +22,12 @@ public final class Libb extends JavaPlugin {
 
     public MenusLoader menusLoader;
 
+    @Getter
+    private static Libb instance;
+
     @Override
     public void onEnable() {
+        instance = this;
         saveDefaultConfig();
 
         getCommand("libb").setExecutor(new LibbCommand(this));

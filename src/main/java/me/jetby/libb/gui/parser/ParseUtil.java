@@ -2,6 +2,7 @@ package me.jetby.libb.gui.parser;
 
 import me.jetby.libb.action.record.ActionBlock;
 import me.jetby.libb.action.record.Expression;
+import me.jetby.libb.gui.parser.view.ItemPatchParser;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ParseUtil {
+
     public static Map<ClickType, ActionBlock> getClicks(@NotNull ConfigurationSection section) {
         Map<ClickType, ActionBlock> clicks = new HashMap<>();
 
@@ -30,41 +32,38 @@ public class ParseUtil {
 
         for (String key : onClickSec.getKeys(false)) {
             switch (key) {
-                case "any" -> clicks.put(null, ParseUtil.getActionBlock(onClickSec, key));
-                case "left" -> clicks.put(ClickType.LEFT, ParseUtil.getActionBlock(onClickSec, key));
-                case "shift_left" -> clicks.put(ClickType.SHIFT_LEFT, ParseUtil.getActionBlock(onClickSec, key));
-                case "right" -> clicks.put(ClickType.RIGHT, ParseUtil.getActionBlock(onClickSec, key));
-                case "shift_right" -> clicks.put(ClickType.SHIFT_RIGHT, ParseUtil.getActionBlock(onClickSec, key));
-                case "middle" -> clicks.put(ClickType.MIDDLE, ParseUtil.getActionBlock(onClickSec, key));
-                case "drop" -> clicks.put(ClickType.DROP, ParseUtil.getActionBlock(onClickSec, key));
-                case "control_drop" -> clicks.put(ClickType.CONTROL_DROP, ParseUtil.getActionBlock(onClickSec, key));
-                case "window_border_left" ->
-                        clicks.put(ClickType.WINDOW_BORDER_LEFT, ParseUtil.getActionBlock(onClickSec, key));
-                case "window_border_right" ->
-                        clicks.put(ClickType.WINDOW_BORDER_RIGHT, ParseUtil.getActionBlock(onClickSec, key));
-                case "double" -> clicks.put(ClickType.DOUBLE_CLICK, ParseUtil.getActionBlock(onClickSec, key));
-                case "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "num_7", "num_8", "num_9" ->
-                        clicks.put(ClickType.NUMBER_KEY, ParseUtil.getActionBlock(onClickSec, key));
+                case "any"               -> clicks.put(null,                         ParseUtil.getActionBlock(onClickSec, key));
+                case "left"              -> clicks.put(ClickType.LEFT,               ParseUtil.getActionBlock(onClickSec, key));
+                case "shift_left"        -> clicks.put(ClickType.SHIFT_LEFT,         ParseUtil.getActionBlock(onClickSec, key));
+                case "right"             -> clicks.put(ClickType.RIGHT,              ParseUtil.getActionBlock(onClickSec, key));
+                case "shift_right"       -> clicks.put(ClickType.SHIFT_RIGHT,        ParseUtil.getActionBlock(onClickSec, key));
+                case "middle"            -> clicks.put(ClickType.MIDDLE,             ParseUtil.getActionBlock(onClickSec, key));
+                case "drop"              -> clicks.put(ClickType.DROP,               ParseUtil.getActionBlock(onClickSec, key));
+                case "control_drop"      -> clicks.put(ClickType.CONTROL_DROP,       ParseUtil.getActionBlock(onClickSec, key));
+                case "window_border_left"  -> clicks.put(ClickType.WINDOW_BORDER_LEFT,  ParseUtil.getActionBlock(onClickSec, key));
+                case "window_border_right" -> clicks.put(ClickType.WINDOW_BORDER_RIGHT, ParseUtil.getActionBlock(onClickSec, key));
+                case "double"            -> clicks.put(ClickType.DOUBLE_CLICK,       ParseUtil.getActionBlock(onClickSec, key));
+                case "num_1", "num_2", "num_3", "num_4",
+                     "num_5", "num_6", "num_7", "num_8", "num_9"
+                        -> clicks.put(ClickType.NUMBER_KEY,         ParseUtil.getActionBlock(onClickSec, key));
             }
         }
         return clicks;
-
     }
 
     private static List<Integer> parseSlots(Object slotObject) {
         List<Integer> slots = new ArrayList<>();
 
-        if (slotObject instanceof Integer) {
-            slots.add((Integer) slotObject);
-        } else if (slotObject instanceof String) {
-            String slotString = ((String) slotObject).trim();
-            slots.addAll(parseSlotString(slotString));
-        } else if (slotObject instanceof List<?>) {
-            for (Object obj : (List<?>) slotObject) {
-                if (obj instanceof Integer) {
-                    slots.add((Integer) obj);
-                } else if (obj instanceof String) {
-                    slots.addAll(parseSlotString((String) obj));
+        if (slotObject instanceof Integer i) {
+            slots.add(i);
+        } else if (slotObject instanceof String s) {
+            slots.addAll(parseSlotString(s.trim()));
+        } else if (slotObject instanceof List<?> list) {
+            for (Object obj : list) {
+                if (obj instanceof Integer i) {
+                    slots.add(i);
+                } else if (obj instanceof String s) {
+                    slots.addAll(parseSlotString(s));
                 }
             }
         } else {
@@ -80,10 +79,8 @@ public class ParseUtil {
             try {
                 String[] range = slotString.split("-");
                 int start = Integer.parseInt(range[0].trim());
-                int end = Integer.parseInt(range[1].trim());
-                for (int i = start; i <= end; i++) {
-                    slots.add(i);
-                }
+                int end   = Integer.parseInt(range[1].trim());
+                for (int i = start; i <= end; i++) slots.add(i);
             } catch (NumberFormatException e) {
                 Bukkit.getLogger().warning("Error parsing slot range: " + slotString);
             }
@@ -106,9 +103,9 @@ public class ParseUtil {
             ConfigurationSection item = items.getConfigurationSection(key);
             if (item == null) continue;
 
-            String type = item.getString("type");
+            String type        = item.getString("type");
             String displayName = item.getString("display_name");
-            List<String> lore = item.getStringList("lore");
+            List<String> lore  = item.getStringList("lore");
 
             String material = item.getString("material", "STONE").toUpperCase();
             ItemStack itemStack;
@@ -139,108 +136,70 @@ public class ParseUtil {
             for (String enchantmentName : item.getStringList("enchantments")) {
                 NamespacedKey k = NamespacedKey.minecraft(enchantmentName.toLowerCase());
                 Enchantment enchantment = Registry.ENCHANTMENT.get(k);
-                if (enchantment != null) {
-                    enchantments.add(enchantment);
-                }
+                if (enchantment != null) enchantments.add(enchantment);
             }
 
-            Item finalItem = new Item(itemStack, type, displayName, lore, itemStack.getType(), slots, flags, enchantments);
+            Item finalItem = new Item(itemStack, type, displayName, lore,
+                    itemStack.getType(), slots, flags, enchantments);
             finalItem.onClick().putAll(getClicks(item));
             finalItem.section(item);
+
+            finalItem.viewRequirements(ItemPatchParser.parse(item));
+
             itemList.add(finalItem);
         }
 
         return itemList;
     }
 
-    public static @Nullable ActionBlock getActionBlock(@NotNull FileConfiguration configuration, @NotNull String path) {
-        List<String> staticActions = new ArrayList<>();
-        List<Expression> expressions = new ArrayList<>();
+    public static @Nullable ActionBlock getActionBlock(@NotNull FileConfiguration configuration,
+                                                       @NotNull String path) {
+        List<String>     staticActions = new ArrayList<>();
+        List<Expression> expressions   = new ArrayList<>();
 
         List<?> list = configuration.getList(path);
-        if (list == null) {
-            return null;
-        }
+        if (list == null) return null;
 
+        fillActionBlock(list, staticActions, expressions);
+        return new ActionBlock(staticActions, expressions);
+    }
+
+    public static @Nullable ActionBlock getActionBlock(@NotNull ConfigurationSection configuration,
+                                                       @NotNull String path) {
+        List<String>     staticActions = new ArrayList<>();
+        List<Expression> expressions   = new ArrayList<>();
+
+        List<?> list = configuration.getList(path);
+        if (list == null) return null;
+
+        fillActionBlock(list, staticActions, expressions);
+        return new ActionBlock(staticActions, expressions);
+    }
+
+    private static void fillActionBlock(List<?> list,
+                                        List<String> staticActions,
+                                        List<Expression> expressions) {
         for (Object object : list) {
-
             if (object instanceof String string) {
                 staticActions.add(string);
                 continue;
             }
-
-            // - example_check: { ... }
             if (object instanceof Map<?, ?> map) {
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
-
                     String key = String.valueOf(entry.getKey());
-
-                    if (!(entry.getValue() instanceof Map<?, ?> sectionMap)) {
-                        continue;
-                    }
+                    if (!(entry.getValue() instanceof Map<?, ?> sectionMap)) continue;
 
                     ConfigurationSection section =
                             new MemoryConfiguration().createSection(key, sectionMap);
 
                     String expression = section.getString("if");
-                    if (expression == null) {
-                        continue;
-                    }
+                    if (expression == null) continue;
 
                     List<String> success = section.getStringList("then");
-                    List<String> fail = section.getStringList("else");
-
+                    List<String> fail    = section.getStringList("else");
                     expressions.add(new Expression(expression, success, fail));
                 }
             }
         }
-
-        return new ActionBlock(staticActions, expressions);
     }
-
-    public static @Nullable ActionBlock getActionBlock(@NotNull ConfigurationSection configuration, @NotNull String path) {
-        List<String> staticActions = new ArrayList<>();
-        List<Expression> expressions = new ArrayList<>();
-
-        List<?> list = configuration.getList(path);
-        if (list == null) {
-            return null;
-        }
-
-        for (Object object : list) {
-
-            if (object instanceof String string) {
-                staticActions.add(string);
-                continue;
-            }
-
-            // - example_check: { ... }
-            if (object instanceof Map<?, ?> map) {
-                for (Map.Entry<?, ?> entry : map.entrySet()) {
-
-                    String key = String.valueOf(entry.getKey());
-
-                    if (!(entry.getValue() instanceof Map<?, ?> sectionMap)) {
-                        continue;
-                    }
-
-                    ConfigurationSection section =
-                            new MemoryConfiguration().createSection(key, sectionMap);
-
-                    String expression = section.getString("if");
-                    if (expression == null) {
-                        continue;
-                    }
-
-                    List<String> success = section.getStringList("then");
-                    List<String> fail = section.getStringList("else");
-
-                    expressions.add(new Expression(expression, success, fail));
-                }
-            }
-        }
-
-        return new ActionBlock(staticActions, expressions);
-    }
-
 }
