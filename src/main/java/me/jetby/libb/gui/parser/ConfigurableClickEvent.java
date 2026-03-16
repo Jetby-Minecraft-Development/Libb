@@ -7,6 +7,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 public class ConfigurableClickEvent extends InventoryClickEvent {
     @Getter
     private final ConfigurationSection section;
+    @Getter
     private final ItemWrapper wrapper;
     public ConfigurableClickEvent(InventoryClickEvent event, ConfigurationSection section, ItemWrapper wrapper) {
         super(event.getView(), event.getSlotType(), event.getSlot(), event.getClick(), event.getAction());

@@ -4,9 +4,9 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.jetby.libb.Libb;
 import me.jetby.libb.action.record.ActionBlock;
 import me.jetby.libb.action.record.Expression;
+import me.jetby.libb.action.events.PreActionExecute;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -29,35 +29,40 @@ import java.util.List;
  * );
  * }</pre>
  */
+@SuppressWarnings("unused")
 public final class ActionExecute {
 
     public static void run(@NotNull ActionContext ctx, @NotNull String line) {
-        String key = ActionRegistry.resolveKey(line);
+        String namespaceHint = ctx.getPlugin() != null
+                ? ctx.getPlugin().getName().toLowerCase()
+                : null;
+
+        String key = ActionRegistry.resolveKey(line, namespaceHint);
         if (key == null) return;
 
-        Action handler = ActionRegistry.resolve(line);
+        Action handler = ActionRegistry.resolve(line, namespaceHint);
         if (handler == null) return;
 
         String rawText = ActionRegistry.extractText(line, key);
         String text = ctx.getPlayer() != null
                 ? PlaceholderAPI.setPlaceholders(ctx.getPlayer(), rawText)
                 : rawText;
+        Bukkit.getPluginManager().callEvent(new PreActionExecute(ctx, key));
         handler.execute(ctx, text);
     }
-
+    public static void run(@NotNull ActionContext ctx, @NotNull List<String> list) {
+        scheduleChain(ctx, new ArrayList<>(list), 0, 0);
+    }
     public static void run(@NotNull ActionContext ctx,
                            @NotNull ActionBlock block) {
 
-        List<Object> items = new ArrayList<>();
-        items.addAll(block.staticActions());
-        for (Expression expression : block.expressions()) {
-            items.add(expression);
-        }
+        List<Object> items = new ArrayList<>(block.staticActions());
+        items.addAll(block.expressions());
 
         scheduleChain(ctx, items, 0, 0);
     }
     public static void run(@NotNull ActionContext ctx, @NotNull Expression expression) {
-        boolean result = evaluate(ctx.getPlayer(), expression.expression());
+        boolean result = evaluate(ctx.getPlayer(), expression.input());
         Iterable<String> lines = result ? expression.success() : expression.fail();
         for (String line : lines) {
             run(ctx, line);
@@ -125,7 +130,7 @@ public final class ActionExecute {
     }
 
     private static long parseDelay(@NotNull String line) {
-        String key = ActionRegistry.resolveKey(line);
+        String key = ActionRegistry.resolveKey(line, ActionRegistry.LIBB);
         if (key == null) return -1;
 
         if (!key.equals("delay") && !key.equals("libb:delay")) return -1;

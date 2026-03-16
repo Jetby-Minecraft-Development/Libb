@@ -1,9 +1,7 @@
 package me.jetby.libb.gui;
 
 import lombok.Getter;
-import me.clip.placeholderapi.PlaceholderAPI;
 import me.jetby.libb.Keys;
-import me.jetby.libb.Libb;
 import me.jetby.libb.gui.item.ItemWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -27,7 +25,7 @@ public class AdvancedGui implements InventoryHolder {
 
     private final Inventory inventory;
     @Getter
-    private final Map<String, ItemWrapper> items = new HashMap<>();
+    private final Map<String, ItemWrapper> wrappers = new HashMap<>();
     private Consumer<InventoryClickEvent> onClick;
     private Consumer<InventoryDragEvent> onDrag;
     private Consumer<InventoryOpenEvent> onOpen;
@@ -100,7 +98,7 @@ public class AdvancedGui implements InventoryHolder {
             inventory.setItem(slot, itemStack);
         }
 
-        items.put(key, wrapper);
+        wrappers.put(key, wrapper);
 
     }
 

@@ -49,7 +49,7 @@ public final class ActionRegistry {
         register(LIBB, "title",                new Title());
         register(LIBB, "sound",                new Sound());
         register(LIBB, "refresh",              new Refresh());
-        register(LIBB, "delay",              new Delay());
+        register(LIBB, "delay",                new Delay());
     }
 
     /**
@@ -111,7 +111,7 @@ public final class ActionRegistry {
      * </ul>
      */
     @Nullable
-    public static Action resolve(@NotNull String line) {
+    public static Action resolve(@NotNull String line, @Nullable String namespaceHint) {
         String lower = line.toLowerCase();
 
         for (Map.Entry<String, Action> entry : HANDLERS.entrySet()) {
@@ -120,8 +120,20 @@ public final class ActionRegistry {
             }
         }
 
+        if (namespaceHint != null) {
+            String hint = namespaceHint.toLowerCase();
+            for (Map.Entry<String, Action> entry : HANDLERS.entrySet()) {
+                String ns = namespacePart(entry.getKey());
+                String cmd = commandPart(entry.getKey());
+                if (ns.equals(hint) && lower.startsWith("[" + cmd + "]")) {
+                    return entry.getValue();
+                }
+            }
+        }
+
         for (Map.Entry<String, Action> entry : HANDLERS.entrySet()) {
-            if (lower.startsWith("[" + commandPart(entry.getKey()) + "]")) {
+            if (namespacePart(entry.getKey()).equals(LIBB)
+                    && lower.startsWith("[" + commandPart(entry.getKey()) + "]")) {
                 return entry.getValue();
             }
         }
@@ -134,19 +146,35 @@ public final class ActionRegistry {
      * Returns the full key {@code "ns:cmd"} or the short form {@code "cmd"}.
      */
     @Nullable
-    public static String resolveKey(@NotNull String line) {
+    public static String resolveKey(@NotNull String line, @Nullable String namespaceHint) {
         String lower = line.toLowerCase();
 
         for (String full : HANDLERS.keySet()) {
             if (lower.startsWith("[" + full + "]")) return full;
         }
 
+        if (namespaceHint != null) {
+            String hint = namespaceHint.toLowerCase();
+            for (String full : HANDLERS.keySet()) {
+                String ns = namespacePart(full);
+                String cmd = commandPart(full);
+                if (ns.equals(hint) && lower.startsWith("[" + cmd + "]")) return cmd;
+            }
+        }
+
         for (String full : HANDLERS.keySet()) {
-            String cmd = commandPart(full);
-            if (lower.startsWith("[" + cmd + "]")) return cmd;
+            if (namespacePart(full).equals(LIBB)) {
+                String cmd = commandPart(full);
+                if (lower.startsWith("[" + cmd + "]")) return cmd;
+            }
         }
 
         return null;
+    }
+
+    private static String namespacePart(String fullKey) {
+        int idx = fullKey.indexOf(':');
+        return idx >= 0 ? fullKey.substring(0, idx) : "";
     }
 
     /**

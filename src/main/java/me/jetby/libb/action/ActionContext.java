@@ -2,6 +2,7 @@ package me.jetby.libb.action;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +26,8 @@ public class ActionContext {
 
     @Getter
     private final Player player;
+    @Getter @Nullable
+    private JavaPlugin plugin;
 
     private final Map<Class<?>, Object> objects = new HashMap<>();
 
@@ -32,8 +35,17 @@ public class ActionContext {
         this.player = player;
     }
 
+    private ActionContext(Player player, @Nullable JavaPlugin plugin) {
+        this.player = player;
+        this.plugin = plugin;
+    }
+
     public static ActionContext of(@Nullable Player player) {
         return new ActionContext(player);
+    }
+
+    public static ActionContext of(@Nullable Player player, @NotNull JavaPlugin plugin) {
+        return new ActionContext(player, plugin);
     }
 
     /**

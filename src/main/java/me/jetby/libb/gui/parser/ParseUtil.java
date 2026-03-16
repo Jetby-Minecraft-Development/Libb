@@ -51,7 +51,7 @@ public class ParseUtil {
 
     }
 
-    private static List<Integer> parseSlots(Object slotObject) {
+    public static List<Integer> parseSlots(Object slotObject) {
         List<Integer> slots = new ArrayList<>();
 
         if (slotObject instanceof Integer) {

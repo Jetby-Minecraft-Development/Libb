@@ -18,4 +18,5 @@ public class Test extends PlaceholderExpansion {
     public @NotNull String getVersion() {
         return "";
     }
+
 }

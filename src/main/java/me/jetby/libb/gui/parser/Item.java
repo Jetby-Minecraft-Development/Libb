@@ -59,6 +59,9 @@ public class Item {
     public int priority() { return priority; }
     public void priority(int priority) { this.priority = priority; }
 
+    public boolean enchanted() {return enchanted;}
+    public void enchanted(boolean enchanted) {this.enchanted = enchanted;}
+
     public Item(@Nullable ItemStack itemStack,
                 @Nullable String type,
                 @Nullable String displayName,
@@ -94,4 +97,6 @@ public class Item {
     private @NotNull Map<ClickType, ActionBlock> onClick = new HashMap<>();
     private @NotNull List<String> viewRequirements = new ArrayList<>();
     private int priority = Integer.MAX_VALUE;
+    private boolean enchanted;
+
 }

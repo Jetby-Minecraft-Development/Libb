@@ -39,7 +39,7 @@ public class LibbCommand implements CommandExecutor {
                             event.setCancelled(true);
                             event.getWhoClicked().sendMessage(event.getSection().getString("test"));
                         });
-                gui.getHolder().open(player);
+                gui.open(player);
                 return true;
             }
 

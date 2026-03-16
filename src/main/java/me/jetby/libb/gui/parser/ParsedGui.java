@@ -6,6 +6,7 @@ import me.jetby.libb.Libb;
 import me.jetby.libb.action.ActionContext;
 import me.jetby.libb.action.ActionExecute;
 import me.jetby.libb.action.record.ActionBlock;
+import me.jetby.libb.action.record.Expression;
 import me.jetby.libb.gui.AdvancedGui;
 import me.jetby.libb.gui.item.ItemWrapper;
 import me.jetby.libb.gui.parser.view.RequirementEvaluator;
@@ -14,78 +15,75 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class ParsedGui {
+@Getter
+public class ParsedGui extends AdvancedGui {
 
-    @Getter
-    private final AdvancedGui holder;
     private final Player viewer;
-    private final Gui guiSettings;
-
+    private final Gui gui;
     private final Map<String, Consumer<ConfigurableClickEvent>> clickHandlers = new HashMap<>();
-
-    private record ItemEntry(Item item, ItemWrapper wrapper) {}
+    private final Map<String, String> placeholders = new HashMap<>();
 
     public ParsedGui(@NotNull Player viewer, @NotNull Gui guiDefinition) {
-        this.guiSettings = guiDefinition;
-        this.viewer       = viewer;
-
-        this.holder = new AdvancedGui(
-                Libb.MINI_MESSAGE.deserialize(
-                        PlaceholderAPI.setPlaceholders(viewer, guiDefinition.title())),
-                guiDefinition.size()
-        );
+        super(Libb.MINI_MESSAGE.deserialize(guiDefinition.title()), guiDefinition.size());
+        this.gui = guiDefinition;
+        this.viewer = viewer;
 
         setupLifecycleListeners();
         buildItems(guiDefinition.items());
     }
 
     public ParsedGui(@NotNull Player viewer, @NotNull FileConfiguration config) {
-        this.viewer       = viewer;
+        super(Libb.MINI_MESSAGE.deserialize(config.getString("title", "")), config.getInt("size", 54));
+        this.viewer = viewer;
 
-        this.holder = new AdvancedGui(
-                config.getString("title", ""),
-                config.getInt("size", 54)
-        );
-        this.guiSettings = new Gui(
+        this.gui = new Gui(
                 config.getString("id"),
-                config.getString("title"),
+                applyPlaceholders(config.getString("title")),
                 config.getInt("size"),
                 config.getStringList("command"),
-                config.getStringList("pre_open"),
-                ParseUtil.getActionBlock(config, "on_open"),
-                ParseUtil.getActionBlock(config, "on_close"),
+                applyPlaceholders(config.getStringList("pre_open")),
+                applyPlaceholders(ParseUtil.getActionBlock(config, "on_open")),
+                applyPlaceholders(ParseUtil.getActionBlock(config, "on_close")),
                 ParseUtil.getItems(config)
         );
         setupLifecycleListeners();
-        buildItems(guiSettings.items());
+        buildItems(gui.items());
     }
 
-    private void setupLifecycleListeners() {
-        holder.onOpen(event -> {
-            if (guiSettings.onOpen() != null)
-                ActionExecute.run(ActionContext.of(viewer).with(this), guiSettings.onOpen());
+    public void setupLifecycleListeners() {
+        onClick(event -> {
+            event.setCancelled(true);
         });
-        holder.onClose(event -> {
-            if (guiSettings.onClose() != null)
-                ActionExecute.run(ActionContext.of(viewer).with(this), guiSettings.onClose());
+        onOpen(event -> {
+            refresh();
+            if (gui.onOpen() != null)
+                ActionExecute.run(ActionContext.of(viewer)
+                        .with(this), applyPlaceholders(gui.onOpen()));
+        });
+        onClose(event -> {
+            if (gui.onClose() != null)
+                ActionExecute.run(ActionContext.of(viewer)
+                        .with(this), applyPlaceholders(gui.onClose()));
         });
     }
 
     public void refresh() {
         clearInventory();
-        buildItems(guiSettings.items());
+        buildItems(gui.items());
     }
 
-    private void clearInventory() {
-        holder.getItems().clear();
-        holder.getInventory().clear();
+    public void clearInventory() {
+        getWrappers().forEach((string, wrapper) -> {
+            getInventory().removeItemAnySlot(wrapper.itemStack());
+        });
     }
 
-    private void buildItems(List<Item> items) {
+    public void buildItems(List<Item> items) {
         if (items == null) return;
 
         Map<Integer, List<Item>> slotCandidates = new LinkedHashMap<>();
@@ -120,23 +118,23 @@ public class ParsedGui {
             Item item = e.getKey();
             List<Integer> wonSlots = e.getValue();
 
-            String      key     = UUID.randomUUID().toString();
+            String key = UUID.randomUUID().toString();
             ItemWrapper wrapper = buildItemWrapper(item, wonSlots);
-            holder.setItem(key, wrapper);
+            setItem(key, wrapper);
         }
     }
 
-    private ItemWrapper buildItemWrapper(Item item, List<Integer> wonSlots) {
+    public ItemWrapper buildItemWrapper(Item item, List<Integer> wonSlots) {
         ItemWrapper wrapper = new ItemWrapper(item.itemStack());
         wrapper.slots(wonSlots.toArray(new Integer[0]));
 
         if (item.displayName() != null) {
-            wrapper.setDisplayName(PlaceholderAPI.setPlaceholders(viewer, item.displayName()));
-            wrapper.setRawDisplayName(item.displayName());
+            wrapper.setDisplayName(applyPlaceholders(item.displayName()));
         }
 
-        wrapper.setRawLore(item.lore());
         wrapper.setLore(applyPlaceholders(item.lore()));
+
+        wrapper.enchanted(item.enchanted());
 
         if (item.flags() != null)
             wrapper.flags(item.flags().toArray(new ItemFlag[0]));
@@ -150,24 +148,26 @@ public class ParsedGui {
         return wrapper;
     }
 
-    private ItemWrapper buildItemWrapper(Item item) {
+    public ItemWrapper buildItemWrapper(Item item) {
         return buildItemWrapper(item, item.slots());
     }
 
-    private void dispatchItemClick(Player clicker, ItemWrapper wrapper, Item item,
-                                   org.bukkit.event.inventory.InventoryClickEvent event) {
+    public void dispatchItemClick(Player clicker, ItemWrapper wrapper, Item item,
+                                  org.bukkit.event.inventory.InventoryClickEvent event) {
         if (item.onClick().containsKey(null))
-            ActionExecute.run(ActionContext.of(clicker).with(wrapper).with(this).with(holder),
-                    item.onClick().get(null));
+
+            ActionExecute.run(ActionContext.of(clicker)
+                            .with(wrapper)
+                            .with(this),
+                    applyPlaceholders(item.onClick().get(null)));
 
         for (Map.Entry<ClickType, ActionBlock> entry : item.onClick().entrySet()) {
             ClickType requiredClick = entry.getKey();
             if (!event.getClick().equals(requiredClick)) continue;
             ActionExecute.run(ActionContext.of(clicker)
                             .with(wrapper)
-                            .with(this)
-                            .with(holder),
-                    entry.getValue());
+                            .with(this),
+                    applyPlaceholders(entry.getValue()));
         }
 
         for (Map.Entry<String, Consumer<ConfigurableClickEvent>> handlerEntry : clickHandlers.entrySet()) {
@@ -176,10 +176,37 @@ public class ParsedGui {
         }
     }
 
-    private List<String> applyPlaceholders(List<String> lines) {
+    @SuppressWarnings("unused")
+    public ParsedGui setReplace(String key, String input) {
+        placeholders.put(key, input);
+        return this;
+    }
+
+    public String applyPlaceholders(String line) {
+        if (line == null) return "";
+
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            line = line.replace(entry.getKey(), entry.getValue());
+        }
+        return PlaceholderAPI.setPlaceholders(viewer, line);
+    }
+
+    public @Nullable ActionBlock applyPlaceholders(ActionBlock block) {
+        if (block==null) return null;
+        List<Expression> expressions = new ArrayList<>();
+        for (Expression e : block.expressions()) {
+            String expression = applyPlaceholders(e.input());
+            List<String> success = applyPlaceholders(e.success());
+            List<String> fail = applyPlaceholders(e.fail());
+            expressions.add(new Expression(expression, success, fail));
+        }
+        return new ActionBlock(applyPlaceholders(block.staticActions()), expressions);
+    }
+
+    public List<String> applyPlaceholders(List<String> lines) {
         List<String> result = new ArrayList<>(lines.size());
         for (String line : lines)
-            result.add(PlaceholderAPI.setPlaceholders(viewer, line));
+            result.add(applyPlaceholders(line));
         return result;
     }
 

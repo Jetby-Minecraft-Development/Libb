@@ -53,7 +53,7 @@
     <distributionManagement>
         <repository>
             <id>jetby-repo</id>
-            <url>http://api.jetby.space/</url>
+            <url>https://api.jetby.space/</url>
         </repository>
     </distributionManagement>
 

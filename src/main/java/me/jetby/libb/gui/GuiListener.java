@@ -22,6 +22,7 @@ public class GuiListener implements Listener {
     public void onClick(InventoryClickEvent e) {
         AdvancedGui gui = getHolder(e.getInventory());
         if (gui == null) return;
+
         if (gui.onClick()!=null) {
             gui.onClick().accept(e);
         }
@@ -32,13 +33,11 @@ public class GuiListener implements Listener {
         if (itemStack == null) return;
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null || !meta.getPersistentDataContainer().has(Keys.GUI_ITEM)) {
-            Bukkit.getLogger().info("[Libb] No PDC on item!");
             return;
         }
         String key = meta.getPersistentDataContainer().get(Keys.GUI_ITEM, PersistentDataType.STRING);
-        ItemWrapper wrapper = gui.getItems().get(key);
+        ItemWrapper wrapper = gui.getWrappers().get(key);
         if (wrapper == null) {
-            Bukkit.getLogger().info("[Libb] Wrapper not found for key: " + key);
             return;
         }
         if (wrapper.onClick() != null) {

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
  */
 @FunctionalInterface
 public interface Action {
-
     /**
      * Execute the action.
      *
@@ -31,5 +30,5 @@ public interface Action {
      * @param line text after the key, already processed by PlaceholderAPI
      *             (e.g. for line {@code [message] Hello} → {@code "Hello"})
      */
-        void execute(@NotNull ActionContext ctx, @Nullable String line);
+    void execute(@NotNull ActionContext ctx, @Nullable String line);
 }

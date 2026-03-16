@@ -16,6 +16,6 @@ public class Open implements Action {
         if (player == null) return;
         if (line == null) return;
 
-        new ParsedGui(player, Libb.PARSED_GUIS.get(line)).getHolder().open(player);
+        new ParsedGui(player, Libb.PARSED_GUIS.get(line)).open(player);
     }
 }
