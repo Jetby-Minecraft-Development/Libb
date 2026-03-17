@@ -34,7 +34,7 @@ public class LibbCommand implements CommandExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("test")) {
-                ParsedGui gui = new ParsedGui(player, Libb.PARSED_GUIS.get(args[1]))
+                ParsedGui gui = new ParsedGui(player, Libb.PARSED_GUIS.get(args[1]), plugin)
                         .addClickHandler("test", event -> {
                             event.setCancelled(true);
                             event.getWhoClicked().sendMessage(event.getSection().getString("test"));

@@ -33,7 +33,7 @@ public class CommandRegistrar extends BukkitCommand implements CommandExecutor {
             sender.sendMessage("The command is available only to players.");
             return true;
         }
-        new ParsedGui(player, Libb.PARSED_GUIS.get(menuId)).open(player);
+        new ParsedGui(player, Libb.PARSED_GUIS.get(menuId), plugin).open(player);
 
 
         return true;

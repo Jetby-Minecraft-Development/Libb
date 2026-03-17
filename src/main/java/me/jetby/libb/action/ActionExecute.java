@@ -47,7 +47,8 @@ public final class ActionExecute {
         String text = ctx.getPlayer() != null
                 ? PlaceholderAPI.setPlaceholders(ctx.getPlayer(), rawText)
                 : rawText;
-        Bukkit.getPluginManager().callEvent(new PreActionExecute(ctx, key));
+        Bukkit.getScheduler().runTask(Libb.getInstance(),
+                () -> Bukkit.getPluginManager().callEvent(new PreActionExecute(ctx, key)));
         handler.execute(ctx, text);
     }
     public static void run(@NotNull ActionContext ctx, @NotNull List<String> list) {

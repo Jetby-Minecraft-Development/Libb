@@ -10,36 +10,29 @@ public class Sound implements Action {
     @Override
     public void execute(@NotNull ActionContext ctx, @Nullable String line) {
         Player p = ctx.getPlayer();
-        if (p == null) return;
-        if (line == null) return;
-
-        line = line.replace(".", "_");
+        if (p == null || line == null) return;
 
         var args = line.split(";");
-        org.bukkit.Sound sound;
+        if (args.length < 1) return;
 
+        String soundName = args[0].trim().replace(".", "_").toUpperCase();
+        org.bukkit.Sound sound;
         try {
-            if (args.length >= 1) {
-                sound = org.bukkit.Sound.valueOf(args[0].toUpperCase());
-            } else {
-                return;
-            }
+            sound = org.bukkit.Sound.valueOf(soundName);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             return;
         }
 
-        float volume = 0;
-        float pitch = 0;
-
+        float volume = 1f;
+        float pitch  = 1f;
         try {
-            volume = args.length > 1 ? Float.parseFloat(args[1]) : 1;
-            pitch = args.length > 2 ? Float.parseFloat(args[2]) : 1;
+            if (args.length > 1) volume = Float.parseFloat(args[1].trim());
+            if (args.length > 2) pitch  = Float.parseFloat(args[2].trim());
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
 
         p.playSound(p.getLocation(), sound, volume, pitch);
-
     }
 }

@@ -44,7 +44,10 @@ public class ActionContext {
         return new ActionContext(player);
     }
 
-    public static ActionContext of(@Nullable Player player, @NotNull JavaPlugin plugin) {
+    public static ActionContext of(@Nullable Player player, @Nullable JavaPlugin plugin) {
+        if (plugin==null) {
+            return new ActionContext(player);
+        }
         return new ActionContext(player, plugin);
     }
 
