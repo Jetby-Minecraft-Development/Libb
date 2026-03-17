@@ -8,6 +8,7 @@ import me.jetby.libb.gui.AdvancedGui;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -150,6 +151,12 @@ public class ItemWrapper {
 
     public final void enchanted(boolean enchanted) {
         this.enchanted = enchanted;
+        if (enchanted) {
+            ItemMeta meta = itemStack.getItemMeta();
+            meta.addEnchant(Enchantment.KNOCKBACK, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            itemStack.setItemMeta(meta);
+        }
     }
 
     public final int amount() {
@@ -158,48 +165,6 @@ public class ItemWrapper {
 
     public final void amount(int amount) {
         this.amount = amount;
-    }
-    private String rawDisplayName;
-    private List<String> rawLore;
-
-    public final void setRawDisplayName(String rawDisplayName) {
-        this.rawDisplayName = rawDisplayName;
-    }
-
-    public final void setRawLore(List<String> rawLore) {
-        this.rawLore = rawLore;
-    }
-
-    public final void refresh(Player player, Inventory inventory) {
-        if (itemStack == null) return;
-
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta == null) return;
-
-        if (rawDisplayName != null) {
-            String parsed = PlaceholderAPI.setPlaceholders(player, rawDisplayName);
-            this.displayName = Libb.MINI_MESSAGE.deserialize("<italic:false>" + parsed);
-            meta.displayName(this.displayName);
-        }
-
-        if (rawLore != null) {
-            List<Component> parsed = new ArrayList<>();
-            for (String line : rawLore) {
-                parsed.add(Libb.MINI_MESSAGE.deserialize(
-                        "<italic:false>" + PlaceholderAPI.setPlaceholders(player, line)
-                ));
-            }
-            this.lore = parsed;
-            meta.lore(this.lore);
-        }
-
-        itemStack.setItemMeta(meta);
-
-        if (slots != null && inventory != null) {
-            for (int slot : slots) {
-                inventory.setItem(slot, itemStack);
-            }
-        }
     }
 
     public static ItemWrapper.Builder builder(@NotNull Material material) {
@@ -218,16 +183,6 @@ public class ItemWrapper {
         private List<ItemFlag> flags;
         private Consumer<InventoryClickEvent> onClick;
 
-        private String rawDisplayName;
-        private List<String> rawLore;
-
-        public final void setRawDisplayName(String rawDisplayName) {
-            this.rawDisplayName = rawDisplayName;
-        }
-
-        public final void setRawLore(List<String> rawLore) {
-            this.rawLore = rawLore;
-        }
         private Builder(@NotNull Material material) {
             this.material = material;
         }
@@ -296,39 +251,6 @@ public class ItemWrapper {
             wrapper.onClick = onClick;
 
             return wrapper;
-        }
-
-        public final void refresh(Player player, Inventory inventory) {
-            if (itemStack == null) return;
-
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta == null) return;
-
-            if (rawDisplayName != null) {
-                String parsed = PlaceholderAPI.setPlaceholders(player, rawDisplayName);
-                this.displayName = Libb.MINI_MESSAGE.deserialize("<italic:false>" + parsed);
-                meta.displayName(this.displayName);
-            }
-
-            if (rawLore != null) {
-                List<Component> parsed = new ArrayList<>();
-                for (String line : rawLore) {
-                    parsed.add(Libb.MINI_MESSAGE.deserialize(
-                            "<italic:false>" + PlaceholderAPI.setPlaceholders(player, line)
-                    ));
-                }
-                this.lore = parsed;
-                meta.lore(this.lore);
-            }
-
-            itemStack.setItemMeta(meta);
-
-            // Обновляем предмет во всех слотах инвентаря
-            if (slots != null && inventory != null) {
-                for (int slot : slots) {
-                    inventory.setItem(slot, itemStack);
-                }
-            }
         }
 
     }

@@ -145,12 +145,14 @@ public class ParseUtil {
             }
 
             Item finalItem = new Item(itemStack, type, displayName, lore, itemStack.getType(), slots, flags, enchantments);
+
             finalItem.onClick().putAll(getClicks(item));
             finalItem.section(item);
             finalItem.viewRequirements(item.getStringList("view_requirements"));
             if (item.contains("priority")) {
                 finalItem.priority(item.getInt("priority"));
             }
+            finalItem.enchanted(item.getBoolean("enchanted", false));
             itemList.add(finalItem);
         }
 
