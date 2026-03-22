@@ -30,6 +30,13 @@ public class AdvancedGui implements InventoryHolder {
     private Consumer<InventoryDragEvent> onDrag;
     private Consumer<InventoryOpenEvent> onOpen;
     private Consumer<InventoryCloseEvent> onClose;
+    @Getter
+    private boolean isLockEmptySlots = true;
+
+    public void lockEmptySlots(boolean cancel) {
+        this.isLockEmptySlots = cancel;
+    }
+
     public Player player;
 
     private final Map<String, Function<Player, String>> placeholders = new LinkedHashMap<>();
@@ -148,8 +155,17 @@ public class AdvancedGui implements InventoryHolder {
     }
 
 
+    public void updateItem(@NotNull String key) {
+        ItemWrapper wrapper = wrappers.get(key);
+        if (wrapper == null || wrapper.slots() == null) return;
+        for (int slot : wrapper.slots()) {
+            inventory.setItem(slot, wrapper.itemStack());
+        }
+    }
+
     @Override
     public @NotNull Inventory getInventory() {
         return inventory;
     }
+
 }
