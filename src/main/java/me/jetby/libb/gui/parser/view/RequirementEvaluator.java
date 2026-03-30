@@ -26,7 +26,7 @@ public class RequirementEvaluator {
             int idx = parsed.indexOf(op);
             if (idx < 0) continue;
 
-            String left  = parsed.substring(0, idx).trim();
+            String left = parsed.substring(0, idx).trim();
             String right = parsed.substring(idx + op.length()).trim();
 
             return compare(left, right, op);
@@ -44,11 +44,12 @@ public class RequirementEvaluator {
                 case "!=" -> l != r;
                 case ">=" -> l >= r;
                 case "<=" -> l <= r;
-                case ">"  -> l > r;
-                case "<"  -> l < r;
-                default   -> false;
+                case ">" -> l > r;
+                case "<" -> l < r;
+                default -> false;
             };
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
 
         int cmp = left.compareToIgnoreCase(right);
         return switch (op) {
@@ -56,9 +57,9 @@ public class RequirementEvaluator {
             case "!=" -> cmp != 0;
             case ">=" -> cmp >= 0;
             case "<=" -> cmp <= 0;
-            case ">"  -> cmp > 0;
-            case "<"  -> cmp < 0;
-            default   -> false;
+            case ">" -> cmp > 0;
+            case "<" -> cmp < 0;
+            default -> false;
         };
     }
 }

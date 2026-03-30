@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -26,10 +27,17 @@ public class ActionContext {
 
     @Getter
     private final Player player;
-    @Getter @Nullable
+    @Getter
+    @Nullable
     private JavaPlugin plugin;
 
     private final Map<Class<?>, Object> objects = new HashMap<>();
+
+    private final Map<CharSequence, CharSequence> toReplace = new LinkedHashMap<>();
+
+    public Map<CharSequence, CharSequence> getAllReplace() {
+        return toReplace;
+    }
 
     private ActionContext(Player player) {
         this.player = player;
@@ -45,10 +53,27 @@ public class ActionContext {
     }
 
     public static ActionContext of(@Nullable Player player, @Nullable JavaPlugin plugin) {
-        if (plugin==null) {
+        if (plugin == null) {
             return new ActionContext(player);
         }
         return new ActionContext(player, plugin);
+    }
+
+    /**
+     * Registers a placeholder replacement, similar to {@link String#replace(CharSequence, CharSequence)}.
+     *
+     * @param key   the placeholder to replace
+     * @param value the value to substitute
+     * @return this instance for chaining
+     */
+    public ActionContext replace(CharSequence key, CharSequence value) {
+        toReplace.put(key, value);
+        return this;
+    }
+
+    public ActionContext replaceFromMap(Map<String, String> map) {
+        toReplace.putAll(map);
+        return this;
     }
 
     /**

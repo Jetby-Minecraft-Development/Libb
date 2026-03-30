@@ -1,55 +1,55 @@
 package me.jetby.libb;
 
-import lombok.Getter;
-import me.jetby.libb.configuration.MenusLoader;
-import me.jetby.libb.executors.LibbCommand;
+import me.jetby.libb.command.CommandRegistrar;
+import me.jetby.libb.command.LibbCommand;
+import me.jetby.libb.configuration.GuisConfiguration;
 import me.jetby.libb.gui.AdvancedGui;
-import me.jetby.libb.gui.CommandRegistrar;
 import me.jetby.libb.gui.GuiListener;
 import me.jetby.libb.gui.parser.Gui;
-import me.jetby.libb.papi.Test;
-import me.jetby.libb.tools.Metrics;
+import me.jetby.libb.plugin.LibbPlugin;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-public final class Libb extends JavaPlugin {
+
+public final class Libb extends LibbPlugin {
 
 
     public static final Map<String, Gui> PARSED_GUIS = new HashMap<>();
 
     public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
-    public MenusLoader menusLoader;
+    public static final Set<Plugin> HOOKED_PLUGINS = new HashSet<>();
 
-    @Getter
-    private static Libb instance;
+    public GuisConfiguration guisConfiguration;
+
+    public static Libb INSTANCE;
 
     @Override
     public void onEnable() {
-        instance = this;
-        new Metrics(this, 30288);
+        INSTANCE = this;
 
-        getCommand("libb").setExecutor(new LibbCommand(this));
+        setBStats(this, 30288);
 
-        menusLoader = new MenusLoader(this);
-        menusLoader.load();
-        CommandRegistrar.createCommands(this);
+        new LibbCommand(this).register();
+
+        guisConfiguration = new GuisConfiguration(this);
+        guisConfiguration.load();
 
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
-        new Test().register();
 
     }
 
     @Override
     public void onDisable() {
-        new Test().unregister();
         CommandRegistrar.unregisterAll(this);
 
         for (Player player : Bukkit.getOnlinePlayers()) {

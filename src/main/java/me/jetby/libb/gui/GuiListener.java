@@ -2,7 +2,6 @@ package me.jetby.libb.gui;
 
 import me.jetby.libb.Keys;
 import me.jetby.libb.gui.item.ItemWrapper;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -57,6 +56,7 @@ public class GuiListener implements Listener {
             gui.updateItem(key);
         }
     }
+
     @EventHandler
     public void onDrag(InventoryDragEvent e) {
         AdvancedGui gui = getHolder(e.getInventory());
@@ -79,7 +79,7 @@ public class GuiListener implements Listener {
         AdvancedGui gui = getHolder(e.getInventory());
         if (gui == null) return;
 
-        if (gui.onOpen()!=null) {
+        if (gui.onOpen() != null) {
             gui.onOpen().accept(e);
         }
     }
@@ -89,7 +89,7 @@ public class GuiListener implements Listener {
         AdvancedGui gui = getHolder(e.getInventory());
         if (gui == null) return;
 
-        if (gui.onClose()!=null) {
+        if (gui.onClose() != null) {
             gui.onClose().accept(e);
         }
     }

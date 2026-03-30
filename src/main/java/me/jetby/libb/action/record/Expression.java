@@ -6,4 +6,5 @@ public record Expression(
         String input,
         List<String> success,
         List<String> fail
-) { }
+) {
+}

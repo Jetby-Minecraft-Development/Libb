@@ -116,20 +116,35 @@ public class ComponentColorize {
     /**
      * Creates a gradient component by interpolating colors between start and end hex values.
      *
-     * @param text the text to apply gradient to
+     * @param text     the text to apply gradient to
      * @param startHex starting color in hex format (RRGGBB)
-     * @param endHex ending color in hex format (RRGGBB)
+     * @param endHex   ending color in hex format (RRGGBB)
      * @return component with gradient applied
      */
     private static Component createGradient(String text, String startHex, String endHex) {
         Set<TextDecoration> decorations = new HashSet<>();
         String clean = text;
 
-        if (text.contains("&l")) { decorations.add(TextDecoration.BOLD); clean = clean.replace("&l", ""); }
-        if (text.contains("&n")) { decorations.add(TextDecoration.UNDERLINED); clean = clean.replace("&n", ""); }
-        if (text.contains("&o")) { decorations.add(TextDecoration.ITALIC); clean = clean.replace("&o", ""); }
-        if (text.contains("&m")) { decorations.add(TextDecoration.STRIKETHROUGH); clean = clean.replace("&m", ""); }
-        if (text.contains("&k")) { decorations.add(TextDecoration.OBFUSCATED); clean = clean.replace("&k", ""); }
+        if (text.contains("&l")) {
+            decorations.add(TextDecoration.BOLD);
+            clean = clean.replace("&l", "");
+        }
+        if (text.contains("&n")) {
+            decorations.add(TextDecoration.UNDERLINED);
+            clean = clean.replace("&n", "");
+        }
+        if (text.contains("&o")) {
+            decorations.add(TextDecoration.ITALIC);
+            clean = clean.replace("&o", "");
+        }
+        if (text.contains("&m")) {
+            decorations.add(TextDecoration.STRIKETHROUGH);
+            clean = clean.replace("&m", "");
+        }
+        if (text.contains("&k")) {
+            decorations.add(TextDecoration.OBFUSCATED);
+            clean = clean.replace("&k", "");
+        }
 
         int len = clean.length();
         int startR = Integer.parseInt(startHex.substring(0, 2), 16);

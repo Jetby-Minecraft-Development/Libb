@@ -2,15 +2,16 @@ package me.jetby.libb.action;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.jetby.libb.Libb;
+import me.jetby.libb.action.events.PreActionExecuteEvent;
 import me.jetby.libb.action.record.ActionBlock;
 import me.jetby.libb.action.record.Expression;
-import me.jetby.libb.action.events.PreActionExecute;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entry point for executing actions.
@@ -44,16 +45,24 @@ public final class ActionExecute {
         if (handler == null) return;
 
         String rawText = ActionRegistry.extractText(line, key);
+        for (Map.Entry<CharSequence, CharSequence> c : ctx.getAllReplace().entrySet()) {
+            rawText = rawText.replace(c.getKey(), c.getValue());
+        }
+
         String text = ctx.getPlayer() != null
                 ? PlaceholderAPI.setPlaceholders(ctx.getPlayer(), rawText)
                 : rawText;
-        Bukkit.getScheduler().runTask(Libb.getInstance(),
-                () -> Bukkit.getPluginManager().callEvent(new PreActionExecute(ctx, key)));
+
+        Bukkit.getScheduler().runTask(Libb.INSTANCE,
+                () -> Bukkit.getPluginManager().callEvent(new PreActionExecuteEvent(ctx, key)));
+
         handler.execute(ctx, text);
     }
+
     public static void run(@NotNull ActionContext ctx, @NotNull List<String> list) {
         scheduleChain(ctx, new ArrayList<>(list), 0, 0);
     }
+
     public static void run(@NotNull ActionContext ctx,
                            @NotNull ActionBlock block) {
 
@@ -62,6 +71,7 @@ public final class ActionExecute {
 
         scheduleChain(ctx, items, 0, 0);
     }
+
     public static void run(@NotNull ActionContext ctx, @NotNull Expression expression) {
         boolean result = evaluate(ctx.getPlayer(), expression.input());
         Iterable<String> lines = result ? expression.success() : expression.fail();
@@ -73,8 +83,8 @@ public final class ActionExecute {
     /**
      * Recursively schedule batches separated by [delay] entries.
      *
-     * @param items        remaining items to process
-     * @param batchStart   index of the first item in the current batch
+     * @param items            remaining items to process
+     * @param batchStart       index of the first item in the current batch
      * @param accumulatedDelay total ticks elapsed so far
      */
     private static void scheduleChain(@NotNull ActionContext ctx,
@@ -113,7 +123,7 @@ public final class ActionExecute {
         if (accumulatedDelay <= 0) {
             executeBatch.run();
         } else {
-            Bukkit.getScheduler().runTaskLater(Libb.getInstance(), executeBatch, accumulatedDelay);
+            Bukkit.getScheduler().runTaskLater(Libb.INSTANCE, executeBatch, accumulatedDelay);
         }
 
         if (nextDelay >= 0) {
@@ -122,7 +132,7 @@ public final class ActionExecute {
             if (accumulatedDelay <= 0) {
                 scheduleChain(ctx, items, finalNextBatchStart, finalNextDelay);
             } else {
-                Bukkit.getScheduler().runTaskLater(Libb.getInstance(), () ->
+                Bukkit.getScheduler().runTaskLater(Libb.INSTANCE, () ->
                                 scheduleChain(ctx, items, finalNextBatchStart, finalNextDelay),
                         accumulatedDelay
                 );
@@ -144,6 +154,7 @@ public final class ActionExecute {
             return -1;
         }
     }
+
     private static boolean evaluate(Player player, @NotNull String input) {
         String[] parts = input.split(" ", 3);
         if (parts.length < 3) return false;

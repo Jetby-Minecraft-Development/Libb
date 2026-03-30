@@ -1,17 +1,10 @@
 package me.jetby.libb.gui.item;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import me.clip.placeholderapi.PlaceholderAPI;
 import me.jetby.libb.Libb;
-import me.jetby.libb.gui.AdvancedGui;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -23,159 +16,149 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ItemWrapper {
+
     private List<Integer> slots;
-    private int amount;
     private ItemStack itemStack;
-    private Material material;
-    private Component displayName;
-    private List<Component> lore;
-    private int customModelData;
-    private boolean enchanted;
-    private List<ItemFlag> flags;
     private Consumer<InventoryClickEvent> onClick;
 
-    public ItemWrapper(@NotNull final ItemStack itemStack) {
+    public ItemWrapper(@NotNull ItemStack itemStack) {
         this.itemStack = itemStack;
     }
 
-    public ItemWrapper(@NotNull final Material material) {
-        this.material = material;
+    public ItemWrapper(@NotNull Material material) {
         this.itemStack = new ItemStack(material);
     }
 
-    public ItemWrapper(@NotNull final Material material, int amount) {
-        this.amount = amount;
-        this.material = material;
+    public ItemWrapper(@NotNull Material material, int amount) {
         this.itemStack = new ItemStack(material, amount);
     }
 
-    public final Consumer<InventoryClickEvent> onClick() {
+    private void applyMeta(java.util.function.Consumer<ItemMeta> editor) {
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta == null) return;
+        editor.accept(meta);
+        itemStack.setItemMeta(meta);
+    }
+
+    public Consumer<InventoryClickEvent> onClick() {
         return onClick;
     }
 
-    public final void onClick(Consumer<InventoryClickEvent> onClick) {
+    public void onClick(Consumer<InventoryClickEvent> onClick) {
         this.onClick = onClick;
     }
 
-    public final List<Integer> slots() {
+    public List<Integer> slots() {
         return slots;
     }
 
-    public final void slots(Integer... slot) {
+    public void slots(Integer... slot) {
         this.slots = Arrays.asList(slot);
     }
 
-    public final List<ItemFlag> flags() {
-        return flags;
-    }
-
-    public final void flags(ItemFlag... flags) {
-        this.flags = Arrays.asList(flags);
-    }
-
-    public final ItemStack itemStack() {
+    public ItemStack itemStack() {
         return itemStack;
     }
 
-    public final void itemStack(ItemStack itemStack) {
+    public void itemStack(ItemStack itemStack) {
         this.itemStack = itemStack;
     }
 
-    public final Material material() {
-        return material;
+    public Material material() {
+        return itemStack.getType();
     }
 
-    public final void material(Material material) {
-        this.material = material;
+    public void material(Material material) {
+        itemStack.setType(material);
     }
 
-    public final Component displayName() {
-        return displayName;
-    }
-
-    public final void displayName(Component displayName) {
-        this.displayName = displayName;
-    }
-
-    public final void setDisplayName(String displayName) {
-        this.displayName = Libb.MINI_MESSAGE.deserialize("<italic:false>" + displayName);
+    public Component displayName() {
         ItemMeta meta = itemStack.getItemMeta();
-        meta.displayName(this.displayName);
-        itemStack.setItemMeta(meta);
+        return meta != null ? meta.displayName() : null;
     }
 
-    public final List<Component> lore() {
-        return lore;
+    public void displayName(Component displayName) {
+        applyMeta(meta -> meta.displayName(displayName));
     }
 
-    public final void lore(List<Component> lore) {
-        this.lore = lore;
+    public void displayName(String miniMessage) {
+        displayName(Libb.MINI_MESSAGE.deserialize("<italic:false>" + miniMessage));
+    }
+
+    public List<Component> lore() {
         ItemMeta meta = itemStack.getItemMeta();
-        meta.lore(this.lore);
-        itemStack.setItemMeta(meta);
+        return meta != null ? meta.lore() : null;
     }
 
-    public final void setLore(String... lore) {
+    public void lore(List<Component> lore) {
+        applyMeta(meta -> meta.lore(lore));
+    }
+
+    public void setLore(String... lines) {
         List<Component> list = new ArrayList<>();
-        for (String line : lore) {
+        for (String line : lines) {
             list.add(Libb.MINI_MESSAGE.deserialize("<italic:false>" + line));
         }
-        this.lore = list;
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.lore(this.lore);
-        itemStack.setItemMeta(meta);
+        lore(list);
     }
 
-    public final void setLore(List<String> lore) {
+    public void setLore(List<String> lines) {
         List<Component> list = new ArrayList<>();
-        for (String line : lore) {
+        for (String line : lines) {
             list.add(Libb.MINI_MESSAGE.deserialize("<italic:false>" + line));
         }
-        this.lore = list;
+        lore(list);
+    }
+
+    public int customModelData() {
         ItemMeta meta = itemStack.getItemMeta();
-        meta.lore(this.lore);
-        itemStack.setItemMeta(meta);
+        return meta != null && meta.hasCustomModelData() ? meta.getCustomModelData() : 0;
     }
 
-    public final int customModelData() {
-        return customModelData;
+    public void customModelData(int customModelData) {
+        applyMeta(meta -> meta.setCustomModelData(customModelData));
     }
 
-    public final void customModelData(int customModelData) {
-        this.customModelData = customModelData;
+    public boolean enchanted() {
+        ItemMeta meta = itemStack.getItemMeta();
+        return meta != null && meta.hasEnchants();
     }
 
-    public final boolean enchanted() {
-        return enchanted;
-    }
-
-    public final void enchanted(boolean enchanted) {
-        this.enchanted = enchanted;
+    public void enchanted(boolean enchanted) {
         if (enchanted) {
-            ItemMeta meta = itemStack.getItemMeta();
-            meta.addEnchant(Enchantment.KNOCKBACK, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            itemStack.setItemMeta(meta);
+            applyMeta(meta -> {
+                meta.addEnchant(Enchantment.KNOCKBACK, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            });
         }
     }
 
-    public final int amount() {
-        return amount;
+    public List<ItemFlag> flags() {
+        ItemMeta meta = itemStack.getItemMeta();
+        return meta != null ? new ArrayList<>(meta.getItemFlags()) : new ArrayList<>();
     }
 
-    public final void amount(int amount) {
-        this.amount = amount;
+    public void flags(ItemFlag... flags) {
+        applyMeta(meta -> meta.addItemFlags(flags));
     }
 
-    public static ItemWrapper.Builder builder(@NotNull Material material) {
-        return new ItemWrapper.Builder(material);
+    public int amount() {
+        return itemStack.getAmount();
+    }
+
+    public void amount(int amount) {
+        itemStack.setAmount(amount);
+    }
+
+    public static Builder builder(@NotNull Material material) {
+        return new Builder(material);
     }
 
     public static class Builder {
-        private List<Integer> slots;
-        private int amount;
+        private final Material material;
         private ItemStack itemStack;
-        private Material material;
+        private List<Integer> slots;
+        private int amount = 1;
         private Component displayName;
         private List<Component> lore;
         private int customModelData;
@@ -187,72 +170,71 @@ public class ItemWrapper {
             this.material = material;
         }
 
-        public ItemWrapper.Builder onClick(Consumer<InventoryClickEvent> onClick) {
-            this.onClick = onClick;
-            return this;
-        }
-
-        public final void flags(List<ItemFlag> flags) {
-            this.flags = flags;
-        }
-
-        public ItemWrapper.Builder itemStack(ItemStack itemStack) {
+        public Builder itemStack(ItemStack itemStack) {
             this.itemStack = itemStack;
             return this;
         }
 
-        public ItemWrapper.Builder material(Material material) {
-            this.material = material;
-            return this;
-        }
-
-        public ItemWrapper.Builder slots(Integer... slot) {
+        public Builder slots(Integer... slot) {
             this.slots = Arrays.asList(slot);
             return this;
         }
 
-        public ItemWrapper.Builder displayName(Component displayName) {
+        public Builder displayName(Component displayName) {
             this.displayName = displayName;
             return this;
         }
 
-        public ItemWrapper.Builder lore(List<Component> lore) {
+        public Builder displayName(String miniMessage) {
+            this.displayName = Libb.MINI_MESSAGE.deserialize("<italic:false>" + miniMessage);
+            return this;
+        }
+
+        public Builder lore(List<Component> lore) {
             this.lore = lore;
             return this;
         }
 
-        public ItemWrapper.Builder customModelData(int customModelData) {
+        public Builder customModelData(int customModelData) {
             this.customModelData = customModelData;
             return this;
         }
 
-        public ItemWrapper.Builder enchanted(boolean enchanted) {
+        public Builder enchanted(boolean enchanted) {
             this.enchanted = enchanted;
             return this;
         }
 
-        public ItemWrapper.Builder amount(int amount) {
+        public Builder flags(ItemFlag... flags) {
+            this.flags = Arrays.asList(flags);
+            return this;
+        }
+
+        public Builder amount(int amount) {
             this.amount = amount;
             return this;
         }
 
+        public Builder onClick(Consumer<InventoryClickEvent> onClick) {
+            this.onClick = onClick;
+            return this;
+        }
 
         public ItemWrapper build() {
-            ItemWrapper wrapper = new ItemWrapper(material, amount);
+            ItemWrapper wrapper = new ItemWrapper(
+                    itemStack != null ? itemStack : new ItemStack(material, amount)
+            );
 
-            wrapper.displayName = displayName;
-            wrapper.lore = lore;
             wrapper.slots = slots;
-            wrapper.customModelData = customModelData;
-            wrapper.enchanted = enchanted;
-            wrapper.material = material;
-            wrapper.itemStack = itemStack;
-            wrapper.flags = flags;
             wrapper.onClick = onClick;
+
+            if (displayName != null) wrapper.displayName(displayName);
+            if (lore != null) wrapper.lore(lore);
+            if (customModelData != 0) wrapper.customModelData(customModelData);
+            if (enchanted) wrapper.enchanted(true);
+            if (flags != null) wrapper.flags(flags.toArray(new ItemFlag[0]));
 
             return wrapper;
         }
-
     }
-
 }

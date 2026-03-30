@@ -20,47 +20,112 @@ public class Item {
         this.itemStack = itemStack;
     }
 
-    public @Nullable ItemStack itemStack() { return itemStack; }
-    public void itemStack(@Nullable ItemStack itemStack) { this.itemStack = itemStack; }
+    public @Nullable ItemStack itemStack() {
+        return itemStack;
+    }
 
-    public @Nullable String type() { return type; }
-    public void type(@Nullable String type) { this.type = type; }
+    public void itemStack(@Nullable ItemStack itemStack) {
+        this.itemStack = itemStack;
+    }
 
-    public @Nullable String displayName() { return displayName; }
-    public void displayName(@Nullable String displayName) { this.displayName = displayName; }
+    public @Nullable String type() {
+        return type;
+    }
 
-    public @Nullable List<String> lore() { return lore; }
-    public void lore(@Nullable List<String> lore) { this.lore = lore; }
+    public void type(@Nullable String type) {
+        this.type = type;
+    }
 
-    public @NotNull Material material() { return material; }
-    public void material(@NotNull Material material) { this.material = material; }
+    public @Nullable String displayName() {
+        return displayName;
+    }
 
-    public @NotNull List<Integer> slots() { return slots; }
-    public void slots(@NotNull List<Integer> slots) { this.slots = slots; }
+    public void displayName(@Nullable String displayName) {
+        this.displayName = displayName;
+    }
 
-    public @Nullable List<ItemFlag> flags() { return flags; }
-    public void flags(@Nullable List<ItemFlag> flags) { this.flags = flags; }
+    public @Nullable List<String> lore() {
+        return lore;
+    }
 
-    public @Nullable List<Enchantment> enchantments() { return enchantments; }
-    public void enchantments(@Nullable List<Enchantment> enchantments) { this.enchantments = enchantments; }
+    public void lore(@Nullable List<String> lore) {
+        this.lore = lore;
+    }
 
-    public @NotNull Map<ClickType, ActionBlock> onClick() { return onClick; }
-    public void onClick(@NotNull Map<ClickType, ActionBlock> onClick) { this.onClick = onClick; }
+    public @NotNull Material material() {
+        return material;
+    }
 
-    public @Nullable ConfigurationSection section() { return section; }
-    public void section(@Nullable ConfigurationSection section) { this.section = section; }
+    public void material(@NotNull Material material) {
+        this.material = material;
+    }
 
-    public @NotNull List<String> viewRequirements() { return viewRequirements; }
+    public @NotNull List<Integer> slots() {
+        return slots;
+    }
+
+    public void slots(@NotNull List<Integer> slots) {
+        this.slots = slots;
+    }
+
+    public @Nullable List<ItemFlag> flags() {
+        return flags;
+    }
+
+    public void flags(@Nullable List<ItemFlag> flags) {
+        this.flags = flags;
+    }
+
+    public @Nullable List<Enchantment> enchantments() {
+        return enchantments;
+    }
+
+    public void enchantments(@Nullable List<Enchantment> enchantments) {
+        this.enchantments = enchantments;
+    }
+
+    public @NotNull Map<ClickType, ActionBlock> onClick() {
+        return onClick;
+    }
+
+    public void onClick(@NotNull Map<ClickType, ActionBlock> onClick) {
+        this.onClick = onClick;
+    }
+
+    public @Nullable ConfigurationSection section() {
+        return section;
+    }
+
+    public void section(@Nullable ConfigurationSection section) {
+        this.section = section;
+    }
+
+    public @NotNull List<String> viewRequirements() {
+        return viewRequirements;
+    }
+
     public void viewRequirements(@NotNull List<String> viewRequirements) {
         this.viewRequirements = viewRequirements;
     }
 
-    /** Lower number = higher priority. Default is Integer.MAX_VALUE (lowest). */
-    public int priority() { return priority; }
-    public void priority(int priority) { this.priority = priority; }
+    /**
+     * Lower number = higher priority. Default is Integer.MAX_VALUE (lowest).
+     */
+    public int priority() {
+        return priority;
+    }
 
-    public boolean enchanted() {return enchanted;}
-    public void enchanted(boolean enchanted) {this.enchanted = enchanted;}
+    public void priority(int priority) {
+        this.priority = priority;
+    }
+
+    public boolean enchanted() {
+        return enchanted;
+    }
+
+    public void enchanted(boolean enchanted) {
+        this.enchanted = enchanted;
+    }
 
     public Item(@Nullable ItemStack itemStack,
                 @Nullable String type,

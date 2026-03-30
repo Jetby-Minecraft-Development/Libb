@@ -30,26 +30,28 @@ import java.util.Map;
  */
 public final class ActionRegistry {
 
-    private ActionRegistry() {}
+    private ActionRegistry() {
+    }
 
     private static final Map<String, Action> HANDLERS = new LinkedHashMap<>();
 
     public static final String LIBB = "libb";
+
     static {
-        register(LIBB, "message",              new Message());
-        register(LIBB, "action_bar",           new ActionBar());
-        register(LIBB, "broadcast_action_bar", new BroadcastActionBar());
-        register(LIBB, "broadcast_message",    new BroadcastMessage());
-        register(LIBB, "broadcast_sound",      new BroadcastSound());
-        register(LIBB, "broadcast_title",      new BroadcastTitle());
-        register(LIBB, "console",              new Console());
-        register(LIBB, "effect",               new Effect());
-        register(LIBB, "player",               new Player());
-        register(LIBB, "open",                 new Open());
-        register(LIBB, "title",                new Title());
-        register(LIBB, "sound",                new Sound());
-        register(LIBB, "refresh",              new Refresh());
-        register(LIBB, "delay",                new Delay());
+        register(LIBB, "message", new MessageImpl());
+        register(LIBB, "action_bar", new ActionBarImpl());
+        register(LIBB, "broadcast_action_bar", new BroadcastActionBarImpl());
+        register(LIBB, "broadcast_message", new BroadcastMessageImpl());
+        register(LIBB, "broadcast_sound", new BroadcastSoundImpl());
+        register(LIBB, "broadcast_title", new BroadcastTitleImpl());
+        register(LIBB, "console", new ConsoleImpl());
+        register(LIBB, "effect", new EffectImpl());
+        register(LIBB, "player", new PlayerImpl());
+        register(LIBB, "open", new OpenImpl());
+        register(LIBB, "title", new TitleImpl());
+        register(LIBB, "sound", new SoundImpl());
+        register(LIBB, "refresh", new RefreshImpl());
+        register(LIBB, "delay", new DelayImpl());
     }
 
     /**

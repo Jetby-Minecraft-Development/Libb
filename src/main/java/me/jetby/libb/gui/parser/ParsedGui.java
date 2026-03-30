@@ -6,7 +6,6 @@ import me.jetby.libb.Libb;
 import me.jetby.libb.action.ActionContext;
 import me.jetby.libb.action.ActionExecute;
 import me.jetby.libb.action.record.ActionBlock;
-import me.jetby.libb.action.record.Expression;
 import me.jetby.libb.gui.AdvancedGui;
 import me.jetby.libb.gui.item.ItemWrapper;
 import me.jetby.libb.gui.parser.view.RequirementEvaluator;
@@ -17,7 +16,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -88,7 +86,9 @@ public class ParsedGui extends AdvancedGui {
     // Fields
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** The player this GUI was opened for. Used for PlaceholderAPI and action context. */
+    /**
+     * The player this GUI was opened for. Used for PlaceholderAPI and action context.
+     */
     private final Player viewer;
 
     /**
@@ -154,9 +154,9 @@ public class ParsedGui extends AdvancedGui {
      * and ParsedGui will do everything inline. Slightly less efficient if you open the
      * same GUI for many players (you'd re-parse each time).</p>
      *
-     * @param viewer  the player who will see this GUI
-     * @param config  the config section with title, size, Items, on_open, on_close…
-     * @param plugin  your plugin — needed for action namespace resolution
+     * @param viewer the player who will see this GUI
+     * @param config the config section with title, size, Items, on_open, on_close…
+     * @param plugin your plugin — needed for action namespace resolution
      */
     public ParsedGui(@NotNull Player viewer, @NotNull FileConfiguration config, JavaPlugin plugin) {
         super(Libb.MINI_MESSAGE.deserialize(config.getString("title", "")), config.getInt("size", 54));
@@ -170,8 +170,8 @@ public class ParsedGui extends AdvancedGui {
                 config.getInt("size"),
                 config.getStringList("command"),
                 applyPlaceholders(config.getStringList("pre_open")),
-                applyPlaceholders(ParseUtil.getActionBlock(config, "on_open")),
-                applyPlaceholders(ParseUtil.getActionBlock(config, "on_close")),
+                ParseUtil.getActionBlock(config, "on_open"),
+                ParseUtil.getActionBlock(config, "on_close"),
                 ParseUtil.getItems(config)
         );
         setupLifecycleListeners();
@@ -205,13 +205,15 @@ public class ParsedGui extends AdvancedGui {
             refresh();
             if (gui.onOpen() != null)
                 ActionExecute.run(ActionContext.of(viewer, plugin)
-                        .with(this), applyPlaceholders(gui.onOpen()));
+                        .replaceFromMap(placeholders)
+                        .with(this), gui.onOpen());
         });
 
         onClose(event -> {
             if (gui.onClose() != null)
                 ActionExecute.run(ActionContext.of(viewer, plugin)
-                        .with(this), applyPlaceholders(gui.onClose()));
+                        .replaceFromMap(placeholders)
+                        .with(this), gui.onClose());
         });
     }
 
@@ -334,7 +336,7 @@ public class ParsedGui extends AdvancedGui {
         wrapper.slots(wonSlots.toArray(new Integer[0]));
 
         if (item.displayName() != null) {
-            wrapper.setDisplayName(applyPlaceholders(item.displayName()));
+            wrapper.displayName(applyPlaceholders(item.displayName()));
         }
 
         wrapper.setLore(applyPlaceholders(item.lore()));
@@ -403,17 +405,19 @@ public class ParsedGui extends AdvancedGui {
         if (item.onClick().containsKey(null))
             ActionExecute.run(ActionContext.of(clicker, plugin)
                             .with(wrapper)
+                            .replaceFromMap(placeholders)
                             .with(this),
-                    applyPlaceholders(item.onClick().get(null)));
+                    item.onClick().get(null));
 
         // 2. Specific click type match (LEFT, RIGHT, SHIFT_LEFT, etc.)
         for (Map.Entry<ClickType, ActionBlock> entry : item.onClick().entrySet()) {
             ClickType requiredClick = entry.getKey();
             if (!event.getClick().equals(requiredClick)) continue;
             ActionExecute.run(ActionContext.of(clicker, plugin)
+                            .replaceFromMap(placeholders)
                             .with(wrapper)
                             .with(this),
-                    applyPlaceholders(entry.getValue()));
+                    entry.getValue());
         }
 
         // 3. Programmatic handlers registered via addClickHandler()
@@ -469,27 +473,6 @@ public class ParsedGui extends AdvancedGui {
         return PlaceholderAPI.setPlaceholders(viewer, line);
     }
 
-    /**
-     * Apply placeholders to an entire {@link ActionBlock}.
-     *
-     * <p>Returns {@code null} if the input block is null (preserves the "no block" state
-     * so callers can still do {@code if (gui.onOpen() != null)} checks).</p>
-     *
-     * @param block the action block to process; may be null
-     * @return a new ActionBlock with all strings replaced, or null
-     */
-    @Nullable
-    public ActionBlock applyPlaceholders(ActionBlock block) {
-        if (block == null) return null;
-        List<Expression> expressions = new ArrayList<>();
-        for (Expression e : block.expressions()) {
-            String expression = applyPlaceholders(e.input());
-            List<String> success = applyPlaceholders(e.success());
-            List<String> fail = applyPlaceholders(e.fail());
-            expressions.add(new Expression(expression, success, fail));
-        }
-        return new ActionBlock(applyPlaceholders(block.staticActions()), expressions);
-    }
 
     /**
      * Apply placeholders to every string in a list.

@@ -17,7 +17,9 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -31,7 +33,7 @@ public class AdvancedGui implements InventoryHolder {
     private Consumer<InventoryOpenEvent> onOpen;
     private Consumer<InventoryCloseEvent> onClose;
     @Getter
-    private boolean isLockEmptySlots = true;
+    private boolean isLockEmptySlots = false;
 
     public void lockEmptySlots(boolean cancel) {
         this.isLockEmptySlots = cancel;
@@ -69,8 +71,6 @@ public class AdvancedGui implements InventoryHolder {
     public AdvancedGui(Component title, @NotNull InventoryType inventoryType) {
         this.inventory = Bukkit.createInventory(this, inventoryType, title);
     }
-
-
 
     public void setItem(@NotNull String key, @NotNull ItemWrapper wrapper) {
         if (wrapper.slots() == null) return;
