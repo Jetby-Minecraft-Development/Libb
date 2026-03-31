@@ -104,14 +104,15 @@ public class ParseUtil {
 
         List<Item> itemList = new ArrayList<>();
         for (String key : items.getKeys(false)) {
-            ConfigurationSection item = items.getConfigurationSection(key);
-            if (item == null) continue;
+            ConfigurationSection section = items.getConfigurationSection(key);
+            if (section == null) continue;
 
-            String type = item.getString("type");
-            String displayName = item.getString("display_name");
-            List<String> lore = item.getStringList("lore");
+            String type = section.getString("type");
+            String displayName = section.getString("display_name");
+            List<String> lore = section.getStringList("lore");
+            int customModelData = section.getInt("custom-model-data");
 
-            String material = item.getString("material", "STONE").toUpperCase();
+            String material = section.getString("material", "STONE").toUpperCase();
             ItemStack itemStack;
             if (material.startsWith("BASEHEAD-")) {
                 try {
@@ -125,19 +126,23 @@ public class ParseUtil {
             }
 
             List<Integer> slots = new ArrayList<>();
-            if (item.getInt("slot") <= 0) {
-                slots.addAll(parseSlots(item.getStringList("slots")));
+            if (section.getInt("slot") <= 0) {
+                slots.addAll(parseSlots(section.getStringList("slots")));
             } else {
-                slots.add(item.getInt("slot"));
+                slots.add(section.getInt("slot"));
             }
 
             List<ItemFlag> flags = new ArrayList<>();
-            for (String flag : item.getStringList("flags")) {
-                flags.add(ItemFlag.valueOf(flag.toUpperCase()));
+            for (String flagName : section.getStringList("flags")) {
+                try {
+                    ItemFlag itemFlag = ItemFlag.valueOf(flagName.toUpperCase());
+                    flags.add(itemFlag);
+                } catch (IllegalArgumentException ignored) {
+                }
             }
 
             List<Enchantment> enchantments = new ArrayList<>();
-            for (String enchantmentName : item.getStringList("enchantments")) {
+            for (String enchantmentName : section.getStringList("enchantments")) {
                 NamespacedKey k = NamespacedKey.minecraft(enchantmentName.toLowerCase());
                 Enchantment enchantment = Registry.ENCHANTMENT.get(k);
                 if (enchantment != null) {
@@ -145,29 +150,36 @@ public class ParseUtil {
                 }
             }
 
-            Item finalItem = new Item(itemStack, type, displayName, lore, itemStack.getType(), slots, flags, enchantments);
+            Item item = new Item(itemStack);
+            item.customModelData(customModelData);
+            item.type(type);
+            item.displayName(displayName);
+            item.lore(lore);
+            item.material(itemStack.getType());
+            item.slots(slots);
+            item.flags(flags);
+            item.enchantments(enchantments);
+            item.onClick().putAll(getClicks(section));
+            item.section(section);
+            item.viewRequirements(section.getStringList("view_requirements"));
+            item.enchanted(section.getBoolean("enchanted", false));
 
-            finalItem.onClick().putAll(getClicks(item));
-            finalItem.section(item);
-            finalItem.viewRequirements(item.getStringList("view_requirements"));
-            if (item.contains("priority")) {
-                finalItem.priority(item.getInt("priority"));
+            if (section.contains("priority")) {
+                item.priority(section.getInt("priority"));
             }
-            finalItem.enchanted(item.getBoolean("enchanted", false));
-            itemList.add(finalItem);
+
+            itemList.add(item);
         }
 
         return itemList;
     }
 
-    public static @Nullable ActionBlock getActionBlock(@NotNull FileConfiguration configuration, @NotNull String path) {
-        List<String> staticActions = new ArrayList<>();
-        List<Expression> expressions = new ArrayList<>();
-
-        List<?> list = configuration.getList(path);
+    public static @Nullable ActionBlock getActionBlock(List<?> list) {
         if (list == null) {
             return null;
         }
+        List<String> staticActions = new ArrayList<>();
+        List<Expression> expressions = new ArrayList<>();
 
         for (Object object : list) {
 
@@ -205,49 +217,12 @@ public class ParseUtil {
         return new ActionBlock(staticActions, expressions);
     }
 
+    public static @Nullable ActionBlock getActionBlock(@NotNull FileConfiguration configuration, @NotNull String path) {
+        return getActionBlock(configuration.getList(path));
+    }
+
     public static @Nullable ActionBlock getActionBlock(@NotNull ConfigurationSection configuration, @NotNull String path) {
-        List<String> staticActions = new ArrayList<>();
-        List<Expression> expressions = new ArrayList<>();
-
-        List<?> list = configuration.getList(path);
-        if (list == null) {
-            return null;
-        }
-
-        for (Object object : list) {
-
-            if (object instanceof String string) {
-                staticActions.add(string);
-                continue;
-            }
-
-            // - example_check: { ... }
-            if (object instanceof Map<?, ?> map) {
-                for (Map.Entry<?, ?> entry : map.entrySet()) {
-
-                    String key = String.valueOf(entry.getKey());
-
-                    if (!(entry.getValue() instanceof Map<?, ?> sectionMap)) {
-                        continue;
-                    }
-
-                    ConfigurationSection section =
-                            new MemoryConfiguration().createSection(key, sectionMap);
-
-                    String expression = section.getString("if");
-                    if (expression == null) {
-                        continue;
-                    }
-
-                    List<String> success = section.getStringList("then");
-                    List<String> fail = section.getStringList("else");
-
-                    expressions.add(new Expression(expression, success, fail));
-                }
-            }
-        }
-
-        return new ActionBlock(staticActions, expressions);
+        return getActionBlock(configuration.getList(path));
     }
 
 }

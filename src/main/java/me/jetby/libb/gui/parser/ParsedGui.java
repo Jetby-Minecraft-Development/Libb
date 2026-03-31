@@ -529,7 +529,7 @@ public class ParsedGui extends AdvancedGui {
      * @param sectionKey the key to filter by
      * @return a (possibly empty) list of matching items; never null
      */
-    public List<Item> getBySectionOption(String sectionKey) {
+    public List<Item> getBySectionOption(@NotNull String sectionKey) {
         if (gui.items() == null) return new ArrayList<>();
         return gui.items().stream()
                 .filter(item -> item.section() != null && item.section().contains(sectionKey))

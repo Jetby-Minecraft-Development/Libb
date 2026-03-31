@@ -7,6 +7,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,8 +17,15 @@ import java.util.List;
 import java.util.Map;
 
 public class Item {
-    public Item(@Nullable ItemStack itemStack) {
+
+    public Item(@NotNull ItemStack itemStack) {
         this.itemStack = itemStack;
+        ItemMeta meta = itemStack.getItemMeta();
+        this.displayName = meta.getDisplayName();
+        this.lore = meta.getLore();
+        this.amount = itemStack.getAmount();
+        this.material = itemStack.getType();
+        this.customModelData = meta.getCustomModelData();
     }
 
     public @Nullable ItemStack itemStack() {
@@ -27,6 +35,10 @@ public class Item {
     public void itemStack(@Nullable ItemStack itemStack) {
         this.itemStack = itemStack;
     }
+
+    public int amount() {return amount;}
+
+    public void amount(int amount) {this.amount = amount;}
 
     public @Nullable String type() {
         return type;
@@ -91,6 +103,8 @@ public class Item {
     public void onClick(@NotNull Map<ClickType, ActionBlock> onClick) {
         this.onClick = onClick;
     }
+    public int customModelData() {return customModelData;}
+    public void customModelData(int customModelData) {this.customModelData = customModelData;}
 
     public @Nullable ConfigurationSection section() {
         return section;
@@ -127,27 +141,15 @@ public class Item {
         this.enchanted = enchanted;
     }
 
-    public Item(@Nullable ItemStack itemStack,
-                @Nullable String type,
-                @Nullable String displayName,
-                @Nullable List<String> lore,
-                @NotNull Material material,
-                @NotNull List<Integer> slots,
-                @Nullable List<ItemFlag> flags,
-                @Nullable List<Enchantment> enchantments) {
-        this.itemStack = itemStack;
-        this.type = type;
-        this.displayName = displayName;
-        this.lore = lore;
+    public Item(@NotNull Material material) {
         this.material = material;
-        this.slots = slots;
-        this.flags = flags;
-        this.enchantments = enchantments;
+        this.itemStack = new ItemStack(material);
     }
 
-    public Item(@NotNull Material material, @NotNull List<Integer> slots) {
+    public Item(@NotNull Material material, int amount) {
         this.material = material;
-        this.slots = slots;
+        this.amount = amount;
+        this.itemStack = new ItemStack(material, amount);
     }
 
     private @Nullable ItemStack itemStack;
@@ -163,5 +165,6 @@ public class Item {
     private @NotNull List<String> viewRequirements = new ArrayList<>();
     private int priority = Integer.MAX_VALUE;
     private boolean enchanted;
-
+    private int customModelData;
+    private int amount;
 }
