@@ -8,14 +8,11 @@ import me.jetby.libb.gui.parser.Item;
 import me.jetby.libb.gui.parser.ParseUtil;
 import me.jetby.libb.gui.parser.ParsedGui;
 import me.jetby.libb.util.Logger;
-import org.bukkit.command.CommandMap;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import static me.jetby.libb.command.CommandRegistrar.registerCommand;
@@ -45,28 +42,10 @@ public class GuisConfiguration {
     }
 
     public void unregisterGuiCommands() {
-        try {
-            Field commandMapField = plugin.getServer().getClass().getDeclaredField("commandMap");
-            commandMapField.setAccessible(true);
-            CommandMap commandMap = (CommandMap) commandMapField.get(plugin.getServer());
-
-            for (Gui gui : Libb.PARSED_GUIS.values()) {
-                for (String cmd : gui.command()) {
-                    CommandRegistrar.unregisterCommand(plugin, cmd, commandMap);
-                }
+        for (Gui gui : Libb.PARSED_GUIS.values()) {
+            for (String cmd : gui.command()) {
+                CommandRegistrar.unregisterCommand(plugin, cmd);
             }
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                try {
-                    Method syncCommands = plugin.getServer().getClass().getDeclaredMethod("syncCommands");
-                    syncCommands.setAccessible(true);
-                    syncCommands.invoke(plugin.getServer());
-                } catch (Exception e) {
-                    Logger.warn(plugin, "Failed to sync commands", e);
-                }
-            });
-
-        } catch (Exception e) {
-            Logger.warn(plugin, "Error unregistering gui commands: " + e.getMessage());
         }
     }
 

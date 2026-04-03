@@ -36,9 +36,13 @@ public class Item {
         this.itemStack = itemStack;
     }
 
-    public int amount() {return amount;}
+    public int amount() {
+        return amount;
+    }
 
-    public void amount(int amount) {this.amount = amount;}
+    public void amount(int amount) {
+        this.amount = amount;
+    }
 
     public @Nullable String type() {
         return type;
@@ -103,8 +107,14 @@ public class Item {
     public void onClick(@NotNull Map<ClickType, ActionBlock> onClick) {
         this.onClick = onClick;
     }
-    public int customModelData() {return customModelData;}
-    public void customModelData(int customModelData) {this.customModelData = customModelData;}
+
+    public int customModelData() {
+        return customModelData;
+    }
+
+    public void customModelData(int customModelData) {
+        this.customModelData = customModelData;
+    }
 
     public @Nullable ConfigurationSection section() {
         return section;

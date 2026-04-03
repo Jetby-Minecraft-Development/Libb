@@ -1,6 +1,6 @@
-package me.jetby.libb.command;
+package me.jetby.libb;
 
-import me.jetby.libb.Libb;
+import me.jetby.libb.command.AdvancedCommand;
 import me.jetby.libb.command.annotations.Permission;
 import me.jetby.libb.command.annotations.SubCommand;
 import me.jetby.libb.command.annotations.TabComplete;

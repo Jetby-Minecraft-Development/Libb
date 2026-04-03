@@ -30,13 +30,12 @@ public class CommandRegistrar extends BukkitCommand {
 
     public static void registerCommand(JavaPlugin plugin, String commandName, @NotNull CommandExecutor executor) {
 
-
         try {
             Field commandMapField = plugin.getServer().getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
             CommandMap commandMap = (CommandMap) commandMapField.get(plugin.getServer());
             BukkitCommand cmd = getBukkitCommand(commandName, executor);
-            unregisterCommand(plugin, commandName, commandMap);
+            unregisterCommand(plugin, commandName);
             commandMap.register(plugin.getName(), cmd);
             registeredCommands.put(commandName.toLowerCase(), cmd);
 
@@ -77,21 +76,13 @@ public class CommandRegistrar extends BukkitCommand {
     }
 
 
-    @SuppressWarnings("unchecked")
-    public static void unregisterCommand(JavaPlugin plugin, String commandName, CommandMap commandMap) {
+    public static void unregisterCommand(JavaPlugin plugin, String commandName) {
         try {
-            Field knownCommandsField;
-            try {
-                knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
-            } catch (NoSuchFieldException e) {
-                knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
-            }
+            Field commandMapField = plugin.getServer().getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            CommandMap commandMap = (CommandMap) commandMapField.get(plugin.getServer());
 
-            knownCommandsField.setAccessible(true);
-            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
-
-
-            Command existing = knownCommands.remove(commandName.toLowerCase());
+            Command existing = getCommand(plugin, commandName, commandMap);
             if (existing != null) {
                 existing.unregister(commandMap);
             }
@@ -99,6 +90,31 @@ public class CommandRegistrar extends BukkitCommand {
         } catch (Exception e) {
             Logger.warn(plugin, "Error with command unregistration", e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Command getCommand(JavaPlugin plugin, String commandName, CommandMap commandMap) throws NoSuchFieldException, IllegalAccessException {
+        Field knownCommandsField;
+        try {
+            knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+        } catch (NoSuchFieldException e) {
+            knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+        }
+
+        knownCommandsField.setAccessible(true);
+        Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            try {
+                Method syncCommands = plugin.getServer().getClass().getDeclaredMethod("syncCommands");
+                syncCommands.setAccessible(true);
+                syncCommands.invoke(plugin.getServer());
+            } catch (Exception e) {
+                Logger.warn(plugin, "Failed to sync commands", e);
+            }
+        });
+
+        return knownCommands.remove(commandName.toLowerCase());
     }
 
 

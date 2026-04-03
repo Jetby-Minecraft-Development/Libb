@@ -1,6 +1,5 @@
 package me.jetby.libb;
 
-import me.jetby.libb.command.LibbCommand;
 import me.jetby.libb.configuration.GuisConfiguration;
 import me.jetby.libb.gui.AdvancedGui;
 import me.jetby.libb.gui.GuiListener;
