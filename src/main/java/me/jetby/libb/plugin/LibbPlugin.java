@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 // This class is still in process
-
 public class LibbPlugin extends JavaPlugin {
 
     public boolean isDebug;
@@ -44,7 +43,7 @@ public class LibbPlugin extends JavaPlugin {
     }
 
     public void setVersionUtil(@NotNull String updateLink) {
-        versionUtil = new VersionUtil(this, version, updateLink, getName() + ".update");
+        versionUtil = new VersionUtil(this, version, updateLink, getName().toLowerCase() + ".update");
     }
 
     /**
