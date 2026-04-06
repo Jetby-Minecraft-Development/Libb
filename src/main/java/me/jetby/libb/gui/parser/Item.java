@@ -18,6 +18,34 @@ import java.util.Map;
 
 public class Item {
 
+
+    private @NotNull ItemStack itemStack;
+    private @Nullable String type;
+    private @Nullable String displayName;
+    private @Nullable List<String> lore;
+    private @NotNull Material material;
+    private @NotNull List<Integer> slots = new ArrayList<>();
+    private @Nullable List<ItemFlag> flags;
+    private @Nullable List<Enchantment> enchantments;
+    private @Nullable ConfigurationSection section;
+    private @NotNull Map<ClickType, ActionBlock> onClick = new HashMap<>();
+    private @NotNull List<String> viewRequirements = new ArrayList<>();
+    private int priority = Integer.MAX_VALUE;
+    private boolean enchanted;
+    private int customModelData;
+    private int amount;
+
+    public Item(@NotNull Material material) {
+        this.material = material;
+        this.itemStack = new ItemStack(material);
+    }
+
+    public Item(@NotNull Material material, int amount) {
+        this.material = material;
+        this.amount = amount;
+        this.itemStack = new ItemStack(material, amount);
+    }
+
     public Item(@NotNull ItemStack itemStack) {
         this.itemStack = itemStack;
         ItemMeta meta = itemStack.getItemMeta();
@@ -150,31 +178,4 @@ public class Item {
     public void enchanted(boolean enchanted) {
         this.enchanted = enchanted;
     }
-
-    public Item(@NotNull Material material) {
-        this.material = material;
-        this.itemStack = new ItemStack(material);
-    }
-
-    public Item(@NotNull Material material, int amount) {
-        this.material = material;
-        this.amount = amount;
-        this.itemStack = new ItemStack(material, amount);
-    }
-
-    private @NotNull ItemStack itemStack;
-    private @Nullable String type;
-    private @Nullable String displayName;
-    private @Nullable List<String> lore;
-    private @NotNull Material material = Material.STONE;
-    private @NotNull List<Integer> slots = new ArrayList<>();
-    private @Nullable List<ItemFlag> flags;
-    private @Nullable List<Enchantment> enchantments;
-    private @Nullable ConfigurationSection section;
-    private @NotNull Map<ClickType, ActionBlock> onClick = new HashMap<>();
-    private @NotNull List<String> viewRequirements = new ArrayList<>();
-    private int priority = Integer.MAX_VALUE;
-    private boolean enchanted;
-    private int customModelData;
-    private int amount;
 }

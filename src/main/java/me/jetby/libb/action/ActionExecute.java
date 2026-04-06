@@ -73,7 +73,12 @@ public final class ActionExecute {
     }
 
     public static void run(@NotNull ActionContext ctx, @NotNull Expression expression) {
-        boolean result = evaluate(ctx.getPlayer(), expression.input());
+        String input = expression.input();
+        for (Map.Entry<CharSequence, CharSequence> c : ctx.getAllReplace().entrySet()) {
+            input = input.replace(c.getKey(), c.getValue());
+        }
+
+        boolean result = evaluate(ctx.getPlayer(), input);
         Iterable<String> lines = result ? expression.success() : expression.fail();
         for (String line : lines) {
             run(ctx, line);

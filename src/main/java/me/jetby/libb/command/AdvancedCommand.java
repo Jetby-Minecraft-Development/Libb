@@ -30,7 +30,7 @@ public abstract class AdvancedCommand implements CommandExecutor, TabCompleter {
 
     public AdvancedCommand(@Nullable Command command, @NotNull JavaPlugin plugin, boolean force) {
         this.plugin = plugin;
-        this.aliases = command==null ? new ArrayList<>() : command.getAliases();
+        this.aliases = command == null ? new ArrayList<>() : command.getAliases();
         this.commandName = command.getName();
         if (!force) {
             try {
@@ -106,12 +106,11 @@ public abstract class AdvancedCommand implements CommandExecutor, TabCompleter {
         CommandRegistrar.registerCommand(plugin, commandName, this);
     }
 
-    public AdvancedCommand unregister() {
+    public void unregister() {
         for (String cmd : aliases) {
             CommandRegistrar.unregisterCommand(plugin, cmd);
         }
         CommandRegistrar.unregisterCommand(plugin, commandName);
-        return this;
     }
 
     public AdvancedCommand addSubCommand(Object... instances) {
