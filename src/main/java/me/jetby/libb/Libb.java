@@ -43,8 +43,8 @@ public final class Libb extends LibbPlugin {
         new LibbCommand(this).register();
         guisConfiguration = new GuisConfiguration(this);
         guisConfiguration.load();
-        Logger.info(this, "<#1CFB00>║  <#0AD7FB>" + Libb.PARSED_GUIS.size() + " guis loaded");
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
+        Logger.info(this, "<#1CFB00>║  <#0AD7FB>" + Libb.PARSED_GUIS.size() + " guis loaded");
         Logger.info(this, "<#1CFB00>║");
         Logger.info(this, "<#1CFB00>║  <#1CFB00>Plugin enabled");
         Logger.info(this, "<#1CFB00>╚");
