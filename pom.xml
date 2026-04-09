@@ -6,7 +6,7 @@
 
     <groupId>me.jetby</groupId>
     <artifactId>Libb</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <name>Libb</name>
@@ -53,7 +53,7 @@
     <distributionManagement>
         <repository>
             <id>jetby-repo</id>
-            <url>https://api.jetby.space/</url>
+            <url>https://api.jetby.org/</url>
         </repository>
     </distributionManagement>
 

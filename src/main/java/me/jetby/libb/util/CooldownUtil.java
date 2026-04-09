@@ -16,4 +16,7 @@ public class CooldownUtil {
     public static void set(UUID uuid, String key, int seconds) {
         cooldowns.put(uuid + ":" + key, System.currentTimeMillis() + seconds * 1000L);
     }
+    public static void set(UUID uuid, String key, long l) {
+        cooldowns.put(uuid + ":" + key, System.currentTimeMillis() + l);
+    }
 }
