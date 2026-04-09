@@ -406,7 +406,7 @@ ctx.get(MyInterface.class);
 ```xml
 <repository>
   <id>jetby-repo</id>
-  <url>http://api.jetby.space/</url>
+  <url>https://api.jetby.org/</url>
 </repository>
 ```
 ```xml
@@ -421,7 +421,7 @@ ctx.get(MyInterface.class);
 ```gradle
 repositories {
     maven {
-        url "http://api.jetby.space/"
+        url "https://api.jetby.org/"
         name "jetby-repo"
     }
 }
