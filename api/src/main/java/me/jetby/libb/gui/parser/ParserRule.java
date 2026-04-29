@@ -1,10 +1,10 @@
 package me.jetby.libb.gui.parser;
 
-import me.jetby.libb.color.HashedSerializer;
+import me.jetby.libb.color.Serializer;
 
-public record ParserRule(HashedSerializer serializer) {
+public record ParserRule(Serializer serializer) {
 
-    public static ParserRule of(HashedSerializer serializer) {
+    public static ParserRule of(Serializer serializer) {
         return new ParserRule(serializer);
     }
 }

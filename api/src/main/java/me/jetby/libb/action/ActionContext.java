@@ -40,7 +40,7 @@ public class ActionContext {
 
     @NotNull
     public Serializer getSerializer() {
-        return serializer==null ? LibbApi.Settings.CONFIG_COLORIZER : serializer;
+        return serializer == null ? LibbApi.Settings.CONFIG_COLORIZER : serializer;
     }
 
     private final Map<Class<?>, Object> objects = new HashMap<>();
@@ -51,25 +51,39 @@ public class ActionContext {
         return toReplace;
     }
 
-    private ActionContext(Player player) {
+    private ActionContext() {
+        this.player = null;
+    }
+
+    private ActionContext(@Nullable Player player) {
         this.player = player;
     }
 
-    private ActionContext(Player player, @Nullable JavaPlugin plugin) {
+    private ActionContext(@Nullable Player player, @Nullable JavaPlugin plugin, @Nullable Serializer serializer) {
         this.player = player;
         this.plugin = plugin;
+        this.serializer = serializer;
     }
-
 
     public static ActionContext of(@Nullable Player player) {
         return new ActionContext(player);
+    }
+
+    public static ActionContext of(@Nullable Player player, @Nullable Serializer serializer) {
+        return new ActionContext(player, null, serializer);
     }
 
     public static ActionContext of(@Nullable Player player, @Nullable JavaPlugin plugin) {
         if (plugin == null) {
             return new ActionContext(player);
         }
-        return new ActionContext(player, plugin);
+        return new ActionContext(player, plugin, null);
+    }
+    public static ActionContext of(@Nullable Player player, @Nullable JavaPlugin plugin, @Nullable Serializer serializer) {
+        if (plugin == null) {
+            return new ActionContext(player);
+        }
+        return new ActionContext(player, plugin, serializer);
     }
 
     /**

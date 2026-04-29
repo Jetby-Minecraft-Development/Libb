@@ -2,9 +2,7 @@ package me.jetby.libb.gui;
 
 import lombok.Getter;
 import me.jetby.libb.InstanceFactory;
-import me.jetby.libb.color.HashedSerializer;
 import me.jetby.libb.color.Serializer;
-import me.jetby.libb.color.SerializerType;
 import me.jetby.libb.gui.item.ItemWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -40,7 +38,7 @@ public class AdvancedGui implements InventoryHolder {
     @Getter
     private boolean isLockEmptySlots = false;
 
-    public HashedSerializer defaultSerializer = null;
+    public Serializer defaultSerializer = null;
 
     public void lockEmptySlots(boolean cancel) {
         this.isLockEmptySlots = cancel;
@@ -63,13 +61,13 @@ public class AdvancedGui implements InventoryHolder {
         this.inventory = Bukkit.createInventory(this, size, title);
     }
 
-    public AdvancedGui(String title, SerializerType serializerType) {
-        this.defaultSerializer = Serializer.get(serializerType);
-        this.inventory = Bukkit.createInventory(this, InventoryType.CHEST, title);
+    public AdvancedGui(String title, Serializer serializer) {
+        this.defaultSerializer = serializer;
+        this.inventory = Bukkit.createInventory(this, InventoryType.CHEST, defaultSerializer.deserialize(title));
     }
 
-    public AdvancedGui(String title, int size, SerializerType serializerType) {
-        this.defaultSerializer = Serializer.get(serializerType);
+    public AdvancedGui(String title, int size, Serializer serializer) {
+        this.defaultSerializer = serializer;
         this.inventory = Bukkit.createInventory(this, size, defaultSerializer.deserialize(title));
     }
 
@@ -105,11 +103,11 @@ public class AdvancedGui implements InventoryHolder {
     public void setItem(@NotNull String key, @NotNull ItemWrapper wrapper) {
         if (wrapper.slots() == null) return;
 
-        if (wrapper.key()==null) wrapper.key(key);
+        if (wrapper.key() == null) wrapper.key(key);
 
         ItemStack itemStack = wrapper.itemStack();
-        wrapper.serializer(defaultSerializer);
-
+        if (wrapper.serializer() == null)
+            wrapper.serializer(defaultSerializer);
 
 
         if (itemStack == null) {

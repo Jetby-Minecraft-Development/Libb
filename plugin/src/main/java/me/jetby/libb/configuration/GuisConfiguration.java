@@ -1,12 +1,10 @@
 package me.jetby.libb.configuration;
 
 import me.jetby.libb.Libb;
+import me.jetby.libb.LibbApi;
 import me.jetby.libb.action.record.ActionBlock;
 import me.jetby.libb.command.CommandRegistrar;
-import me.jetby.libb.gui.parser.Gui;
-import me.jetby.libb.gui.parser.Item;
-import me.jetby.libb.gui.parser.ParseUtil;
-import me.jetby.libb.gui.parser.ParsedGui;
+import me.jetby.libb.gui.parser.*;
 import me.jetby.libb.util.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -26,7 +24,7 @@ public class GuisConfiguration {
     }
 
     public void load() {
-        Libb.PARSED_GUIS.clear();
+        LibbApi.Settings.PARSED_GUIS.clear();
 
         File folder = new File(plugin.getDataFolder(), "menus");
         if (!folder.exists()) folder.mkdirs();
@@ -42,7 +40,7 @@ public class GuisConfiguration {
     }
 
     public void unregisterGuiCommands() {
-        for (Gui gui : Libb.PARSED_GUIS.values()) {
+        for (Gui gui : LibbApi.Settings.PARSED_GUIS.values()) {
             for (String cmd : gui.command()) {
                 CommandRegistrar.unregisterCommand(plugin, cmd);
             }
@@ -51,7 +49,7 @@ public class GuisConfiguration {
 
     private void loadGui(String menuId, File file) {
 
-        if (Libb.PARSED_GUIS.containsKey(menuId)) {
+        if (LibbApi.Settings.PARSED_GUIS.containsKey(menuId)) {
             Logger.warn(plugin, "A duplicate of " + menuId + " was found");
             return;
         }
@@ -72,13 +70,13 @@ public class GuisConfiguration {
                         sender.sendMessage("The command is available only to players.");
                         return true;
                     }
-                    new ParsedGui(player, Libb.PARSED_GUIS.get(menuId), Libb.INSTANCE).open(player);
+                    new ParsedGui(player, LibbApi.Settings.PARSED_GUIS.get(menuId), Libb.INSTANCE, ParserRule.of(LibbApi.Settings.CONFIG_COLORIZER)).open(player);
 
                     return true;
                 });
             }
 
-            Libb.PARSED_GUIS.put(menuId, new Gui(
+            LibbApi.Settings.PARSED_GUIS.put(menuId, new Gui(
                     id, title, size, command,
                     preOpenExpressions, onOpen, onClose,
                     items));

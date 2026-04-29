@@ -1,5 +1,6 @@
 package me.jetby.libb.gui;
 
+import me.jetby.libb.color.Serializer;
 import me.jetby.libb.color.SerializerType;
 import me.jetby.libb.gui.item.ItemWrapper;
 import net.kyori.adventure.text.Component;
@@ -24,8 +25,8 @@ public class PaginatedGui extends AdvancedGui {
     public PaginatedGui(@NotNull Inventory inventory) { super(inventory); }
     public PaginatedGui(String title) { super(title); }
     public PaginatedGui(String title, int size) { super(title, size); }
-    public PaginatedGui(String title, SerializerType serializerType) { super(title, serializerType); }
-    public PaginatedGui(String title, int size, SerializerType serializerType) { super(title, size, serializerType); }
+    public PaginatedGui(String title, Serializer serializer) { super(title, serializer); }
+    public PaginatedGui(String title, int size, Serializer serializer) { super(title, size, serializer); }
     public PaginatedGui(String title, InventoryType inventoryType) { super(title, inventoryType); }
     public PaginatedGui(Component title) { super(title); }
     public PaginatedGui(Component title, int size) { super(title, size); }
@@ -56,6 +57,7 @@ public class PaginatedGui extends AdvancedGui {
     public void everyPageLogic() {}
 
     public void openPage(int page) {
+        if (contentSlots==null) return;
         this.currentPage = page;
 
         int perPage = contentSlots.length;

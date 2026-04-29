@@ -1,6 +1,6 @@
 package me.jetby.libb.gui.item;
 
-import me.jetby.libb.color.HashedSerializer;
+import me.jetby.libb.color.Serializer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -25,14 +25,14 @@ public class ItemWrapper {
     private List<Integer> slots;
     private ItemStack itemStack;
     private Consumer<InventoryClickEvent> onClick;
-    private HashedSerializer serializer;
+    private Serializer serializer;
 
 
-    public HashedSerializer serializer() {
+    public Serializer serializer() {
         return serializer;
     }
 
-    public void serializer(HashedSerializer serializer) {
+    public void serializer(Serializer serializer) {
         this.serializer = serializer;
     }
 
@@ -192,7 +192,7 @@ public class ItemWrapper {
         private boolean enchanted;
         private List<ItemFlag> flags;
         private Consumer<InventoryClickEvent> onClick;
-        private HashedSerializer serializer;
+        private Serializer serializer;
         private String key;
 
         private Builder(@NotNull Material material) {
@@ -204,7 +204,7 @@ public class ItemWrapper {
             return this;
         }
 
-        public Builder serializer(HashedSerializer serializer) {
+        public Builder serializer(Serializer serializer) {
             this.serializer = serializer;
             return this;
         }
@@ -233,6 +233,7 @@ public class ItemWrapper {
             this.lore = lore;
             return this;
         }
+
         public Builder setLore(List<String> lines) {
             List<Component> list = new ArrayList<>();
             for (String line : lines) {

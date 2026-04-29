@@ -6,7 +6,6 @@ import me.jetby.libb.color.SerializerType;
 import me.jetby.libb.configuration.GuisConfiguration;
 import me.jetby.libb.gui.AdvancedGui;
 import me.jetby.libb.gui.GuiListener;
-import me.jetby.libb.gui.parser.Gui;
 import me.jetby.libb.plugin.LibbPlugin;
 import me.jetby.libb.util.Logger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -15,16 +14,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Getter
 public final class Libb extends LibbPlugin implements LibbApi {
 
-
-    public static final Map<String, Gui> PARSED_GUIS = new HashMap<>();
 
     @Deprecated(since = "1.2", forRemoval = true)
     public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
@@ -63,7 +58,7 @@ public final class Libb extends LibbPlugin implements LibbApi {
         guisConfiguration = new GuisConfiguration(this);
         guisConfiguration.load();
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
-        Logger.info(this, "<#1CFB00>║  <#0AD7FB>" + Libb.PARSED_GUIS.size() + " guis loaded");
+        Logger.info(this, "<#1CFB00>║  <#0AD7FB>" + LibbApi.Settings.PARSED_GUIS.size() + " guis loaded");
         Logger.info(this, "<#1CFB00>║");
         Logger.info(this, "<#1CFB00>║  <#1CFB00>Plugin enabled");
         Logger.info(this, "<#1CFB00>╚");

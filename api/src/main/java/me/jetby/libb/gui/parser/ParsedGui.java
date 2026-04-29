@@ -122,7 +122,7 @@ public class ParsedGui extends PaginatedGui {
      */
     private final JavaPlugin plugin;
 
-    private ParserRule rule;
+    private ParserRule rule = new ParserRule(null);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Constructors
@@ -140,7 +140,7 @@ public class ParsedGui extends PaginatedGui {
      */
     public ParsedGui(@NotNull Player viewer, @NotNull Gui guiDefinition, JavaPlugin plugin) {
         // AdvancedGui needs the title (as a Component) and the inventory size
-        super(guiDefinition.title(), guiDefinition.size(), LibbApi.Settings.CONFIG_COLORIZER.getType());
+        super(guiDefinition.title(), guiDefinition.size(), LibbApi.Settings.CONFIG_COLORIZER);
         this.gui = guiDefinition;
         this.viewer = viewer;
         this.plugin = plugin;
@@ -152,10 +152,11 @@ public class ParsedGui extends PaginatedGui {
 
     public ParsedGui(@NotNull Player viewer, @NotNull Gui guiDefinition, JavaPlugin plugin, ParserRule rule) {
         // AdvancedGui needs the title (as a Component) and the inventory size
-        super(guiDefinition.title(), guiDefinition.size(), LibbApi.Settings.CONFIG_COLORIZER.getType());
+        super(guiDefinition.title(), guiDefinition.size(), rule.serializer());
         this.gui = guiDefinition;
         this.viewer = viewer;
         this.plugin = plugin;
+        this.rule = rule;
 
         // Wire up open/close/click lifecycle events, then fill the inventory
         setupLifecycleListeners();
@@ -174,7 +175,7 @@ public class ParsedGui extends PaginatedGui {
      * @param plugin your plugin — needed for action namespace resolution
      */
     public ParsedGui(@NotNull Player viewer, @NotNull FileConfiguration config, JavaPlugin plugin) {
-        super(config.getString("title", ""), config.getInt("size", 54), LibbApi.Settings.CONFIG_COLORIZER.getType());
+        super(config.getString("title", ""), config.getInt("size", 54), LibbApi.Settings.CONFIG_COLORIZER);
         this.viewer = viewer;
         this.plugin = plugin;
 
@@ -192,7 +193,26 @@ public class ParsedGui extends PaginatedGui {
         setupLifecycleListeners();
         buildItems(gui.items());
     }
+    public ParsedGui(@NotNull Player viewer, @NotNull FileConfiguration config, JavaPlugin plugin, ParserRule rule) {
+        super(config.getString("title", ""), config.getInt("size", 54), rule.serializer());
+        this.viewer = viewer;
+        this.plugin = plugin;
+        this.rule = rule;
 
+        // Build the Gui record inline from raw config values
+        this.gui = new Gui(
+                config.getString("id"),
+                applyPlaceholders(config.getString("title")),
+                config.getInt("size"),
+                config.getStringList("command"),
+                applyPlaceholders(config.getStringList("pre_open")),
+                ParseUtil.getActionBlock(config, "on_open"),
+                ParseUtil.getActionBlock(config, "on_close"),
+                ParseUtil.getItems(config)
+        );
+        setupLifecycleListeners();
+        buildItems(gui.items());
+    }
     // ─────────────────────────────────────────────────────────────────────────
     // Lifecycle
     // ─────────────────────────────────────────────────────────────────────────
@@ -219,14 +239,14 @@ public class ParsedGui extends PaginatedGui {
             // and placeholders are current
             refresh();
             if (gui.onOpen() != null)
-                ActionExecute.run(ActionContext.of(viewer, plugin)
+                ActionExecute.run(ActionContext.of(viewer, plugin, rule.serializer())
                         .replaceFromMap(placeholders)
                         .with(this), gui.onOpen());
         });
 
         onClose(event -> {
             if (gui.onClose() != null)
-                ActionExecute.run(ActionContext.of(viewer, plugin)
+                ActionExecute.run(ActionContext.of(viewer, plugin, rule.serializer())
                         .replaceFromMap(placeholders)
                         .with(this), gui.onClose());
         });
@@ -348,6 +368,7 @@ public class ParsedGui extends PaginatedGui {
      */
     public ItemWrapper buildItemWrapper(Item item, List<Integer> wonSlots) {
         ItemWrapper wrapper = new ItemWrapper(item.itemStack());
+        wrapper.serializer(rule.serializer());
         wrapper.slots(wonSlots.toArray(new Integer[0]));
 
         if (item.displayName() != null) {
@@ -420,7 +441,7 @@ public class ParsedGui extends PaginatedGui {
 
         // 1. "any" click — null key in the map means "runs for all click types"
         if (item.onClick().containsKey(null))
-            ActionExecute.run(ActionContext.of(clicker, plugin)
+            ActionExecute.run(ActionContext.of(clicker, plugin, rule.serializer())
                             .with(wrapper)
                             .replaceFromMap(placeholders)
                             .with(this),
@@ -430,7 +451,7 @@ public class ParsedGui extends PaginatedGui {
         for (Map.Entry<ClickType, ActionBlock> entry : item.onClick().entrySet()) {
             ClickType requiredClick = entry.getKey();
             if (!event.getClick().equals(requiredClick)) continue;
-            ActionExecute.run(ActionContext.of(clicker, plugin)
+            ActionExecute.run(ActionContext.of(clicker, plugin, rule.serializer())
                             .replaceFromMap(placeholders)
                             .with(wrapper)
                             .with(this),

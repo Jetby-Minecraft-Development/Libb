@@ -5,6 +5,7 @@ import me.jetby.libb.action.Action;
 import me.jetby.libb.action.ActionContext;
 import me.jetby.libb.action.ActionInput;
 import me.jetby.libb.gui.parser.ParsedGui;
+import me.jetby.libb.gui.parser.ParserRule;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +16,7 @@ public class OpenImpl implements Action {
         Player player = ctx.getPlayer();
         if (player == null) return;
 
-        new ParsedGui(player, LibbApi.Settings.PARSED_GUIS.get(input.rawText()), ctx.getPlugin()).open(player);
+        new ParsedGui(player, LibbApi.Settings.PARSED_GUIS.get(input.rawText()), ctx.getPlugin(), ParserRule.of(ctx.getSerializer()))
+                .open(player);
     }
 }

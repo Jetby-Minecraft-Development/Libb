@@ -7,6 +7,7 @@ import me.jetby.libb.command.annotations.TabComplete;
 import me.jetby.libb.command.annotations.messages.InsufficientArgs;
 import me.jetby.libb.gui.AdvancedGui;
 import me.jetby.libb.gui.parser.ParsedGui;
+import me.jetby.libb.gui.parser.ParserRule;
 import me.jetby.libb.test.PGuiTest;
 import me.jetby.libb.util.Logger;
 import org.bukkit.Bukkit;
@@ -30,7 +31,7 @@ public class LibbCommand extends AdvancedCommand {
 
             plugin.guisConfiguration.unregisterGuiCommands();
             plugin.guisConfiguration.load();
-            Logger.info(plugin, "<#0AD7FB>▶ " + Libb.PARSED_GUIS.size() + " guis loaded");
+            Logger.info(plugin, "<#0AD7FB>▶ " + LibbApi.Settings.PARSED_GUIS.size() + " guis loaded");
             for (Player p : Bukkit.getOnlinePlayers()) {
                 Inventory topInventory = p.getOpenInventory().getTopInventory();
                 if (!(topInventory instanceof AdvancedGui)) continue;
@@ -46,14 +47,14 @@ public class LibbCommand extends AdvancedCommand {
 
     @SubCommand("test")
     public void test(Player player) {
-        new PGuiTest(player, plugin, Libb.PARSED_GUIS.get("test")).open(player);
+        new PGuiTest(player, plugin, LibbApi.Settings.PARSED_GUIS.get("test")).open(player);
     }
 
     @SubCommand("open")
     @InsufficientArgs("<red>Usage: /libb open <menu> <player>")
     @Permission("libb.command.open")
     public void open(Player sender, String[] args) {
-        var guiDef = Libb.PARSED_GUIS.get(args[0]);
+        var guiDef = LibbApi.Settings.PARSED_GUIS.get(args[0]);
         if (guiDef == null) {
             sender.sendMessage(LibbApi.Settings.CONFIG_COLORIZER.deserialize("<red>Gui not found"));
             return;
@@ -67,11 +68,11 @@ public class LibbCommand extends AdvancedCommand {
             }
         }
 
-        new ParsedGui(target, guiDef, plugin).open(target);
+        new ParsedGui(target, guiDef, plugin, ParserRule.of(LibbApi.Settings.CONFIG_COLORIZER)).open(target);
     }
     @TabComplete("open")
     public List<String> tabOpen(CommandSender sender, String[] args) {
         if (!sender.hasPermission("libb.command.open")) return List.of();
-        return Libb.PARSED_GUIS.keySet().stream().toList();
+        return LibbApi.Settings.PARSED_GUIS.keySet().stream().toList();
     }
 }

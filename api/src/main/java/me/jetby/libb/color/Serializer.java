@@ -17,6 +17,8 @@ public interface Serializer {
         };
     }
 
+
+
     HashedSerializer PLAIN_TEXT = new HashedSerializer(SerializerType.PLAIN_TEXT);
     HashedSerializer GSON = new HashedSerializer(SerializerType.GSON, true);
     HashedSerializer LEGACY_SECTION = new HashedSerializer(SerializerType.LEGACY_SECTION, true);
