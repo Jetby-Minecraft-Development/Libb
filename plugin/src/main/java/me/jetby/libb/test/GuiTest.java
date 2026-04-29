@@ -1,10 +1,8 @@
 package me.jetby.libb.test;
 
 import me.jetby.libb.color.Serializer;
-import me.jetby.libb.color.SerializerType;
 import me.jetby.libb.gui.AdvancedGui;
 import me.jetby.libb.gui.item.ItemWrapper;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 
 public class GuiTest extends AdvancedGui {

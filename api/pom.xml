@@ -5,20 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.jetby.libb</groupId>
-    <artifactId>plugin</artifactId>
+    <artifactId>api</artifactId>
     <version>1.2</version>
     <packaging>jar</packaging>
 
-    <name>Libb</name>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <build>
-        <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -27,29 +18,19 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>jetby-api</id>
+            <url>https://api.jetby.org/upload/</url>
+        </repository>
+    </distributionManagement>
+
 
     <repositories>
         <repository>
@@ -68,15 +49,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>me.jetby.libb</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.20-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.12.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -92,9 +73,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>me.clip</groupId>
-            <artifactId>placeholderapi</artifactId>
-            <version>2.12.2</version>
+            <groupId>com.mojang</groupId>
+            <artifactId>authlib</artifactId>
+            <version>1.5.21</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

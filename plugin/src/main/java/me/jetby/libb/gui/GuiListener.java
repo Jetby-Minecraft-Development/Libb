@@ -1,6 +1,6 @@
 package me.jetby.libb.gui;
 
-import me.jetby.libb.Keys;
+import me.jetby.libb.InstanceFactory;
 import me.jetby.libb.gui.item.ItemWrapper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -39,12 +39,12 @@ public class GuiListener implements Listener {
         }
 
         ItemMeta meta = itemStack.getItemMeta();
-        if (meta == null || !meta.getPersistentDataContainer().has(Keys.GUI_ITEM)) {
+        if (meta == null || !meta.getPersistentDataContainer().has(InstanceFactory.GUI_ITEM)) {
             if (gui.isLockEmptySlots()) e.setCancelled(true);
             return;
         }
 
-        String key = meta.getPersistentDataContainer().get(Keys.GUI_ITEM, PersistentDataType.STRING);
+        String key = meta.getPersistentDataContainer().get(InstanceFactory.GUI_ITEM, PersistentDataType.STRING);
         ItemWrapper wrapper = gui.getWrappers().get(key);
         if (wrapper == null) {
             if (gui.isLockEmptySlots()) e.setCancelled(true);

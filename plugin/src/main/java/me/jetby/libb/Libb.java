@@ -1,5 +1,6 @@
 package me.jetby.libb;
 
+import lombok.Getter;
 import me.jetby.libb.color.HashedSerializer;
 import me.jetby.libb.color.SerializerType;
 import me.jetby.libb.configuration.GuisConfiguration;
@@ -19,13 +20,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
-public final class Libb extends LibbPlugin {
+@Getter
+public final class Libb extends LibbPlugin implements LibbApi {
 
 
     public static final Map<String, Gui> PARSED_GUIS = new HashMap<>();
-
-    public static HashedSerializer CONFIG_COLORIZER;
 
     @Deprecated(since = "1.2", forRemoval = true)
     public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
@@ -40,11 +39,17 @@ public final class Libb extends LibbPlugin {
     public void onEnable() {
         INSTANCE = this;
         saveDefaultConfig();
+
+        //libb api impl start
+
+
+        //impl end
+
         try {
-            CONFIG_COLORIZER = new HashedSerializer(
+            Settings.CONFIG_COLORIZER = (new HashedSerializer(
                     SerializerType.valueOf(getConfig().getString("serializer.type", "UNIFIED").toUpperCase()),
                     getConfig().getBoolean("serializer.cache.enabled", true), getConfig().getInt("serializer.cache.max-size", 500)
-            );
+            ));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
