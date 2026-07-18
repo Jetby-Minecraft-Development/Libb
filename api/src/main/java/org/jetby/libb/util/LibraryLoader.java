@@ -11,17 +11,29 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class LibraryLoader {
 
     private static final Set<String> CACHE = new HashSet<>();
 
+    public static synchronized void load(Plugin plugin, String cacheKey, String repo, String groupId, String artifactId, String version, String checkClass) {
+        load(plugin, cacheKey, repo, List.of(new Dependency(groupId, artifactId, version, checkClass)));
+    }
+
+    public static synchronized void load(Plugin plugin, String cacheKey, String repo, Dependency dependency) {
+        load(plugin, cacheKey, repo, List.of(dependency));
+    }
+
     public static synchronized void load(Plugin plugin, String cacheKey, String repo, List<Dependency> dependencies) {
-        if (CACHE.contains(cacheKey)) return;
+        if (CACHE.contains(cacheKey)) {
+
+            return;
+        }
 
         File libsFolder = new File("plugins" + File.separator + "Libb" + File.separator + "libs");
         libsFolder.mkdirs();
@@ -78,7 +90,8 @@ public class LibraryLoader {
         try {
             Class.forName(className);
             return true;
-        } catch (ClassNotFoundException ignored) {}
+        } catch (ClassNotFoundException ignored) {
+        }
 
         for (Plugin p : Bukkit.getPluginManager().getPlugins()) {
             String path = className.replace(".", "/") + ".class";
@@ -106,5 +119,6 @@ public class LibraryLoader {
         return output;
     }
 
-    public record Dependency(String groupId, String artifactId, String version, String checkClass) {}
+    public record Dependency(String groupId, String artifactId, String version, String checkClass) {
+    }
 }
