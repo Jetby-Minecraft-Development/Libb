@@ -19,6 +19,7 @@ public class PlatformMeta {
     }
 
     public static void setDisplayName(ItemMeta meta, Component component) {
+        if (component==null) return;
         if (LibbApi.Settings.PLATFORM == Platform.PAPER) {
             meta.displayName(component);
         } else {
