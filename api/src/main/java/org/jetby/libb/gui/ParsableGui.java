@@ -192,9 +192,9 @@ public class ParsableGui extends PaginatedGui {
                 applyPlaceholders(config.getString("title")),
                 config.getInt("size"),
                 config.getStringList("command"),
-                ParseUtil.getExpressions(applyPlaceholders(config.getStringList("open_requirements"))),
-                ParseUtil.getActionBlock(config, "on_open"),
-                ParseUtil.getActionBlock(config, "on_close"),
+                ActionUtil.getExpressions(applyPlaceholders(config.getStringList("open_requirements"))),
+                ActionUtil.getActionBlock(config, "on_open"),
+                ActionUtil.getActionBlock(config, "on_close"),
                 ParseUtil.getItems(config)
         );
         setupLifecycleListeners();
@@ -212,9 +212,9 @@ public class ParsableGui extends PaginatedGui {
                 applyPlaceholders(config.getString("title")),
                 config.getInt("size"),
                 config.getStringList("command"),
-                ParseUtil.getExpressions(applyPlaceholders(config.getStringList("open_requirements"))),
-                ParseUtil.getActionBlock(config, "on_open"),
-                ParseUtil.getActionBlock(config, "on_close"),
+                ActionUtil.getExpressions(applyPlaceholders(config.getStringList("open_requirements"))),
+                ActionUtil.getActionBlock(config, "on_open"),
+                ActionUtil.getActionBlock(config, "on_close"),
                 ParseUtil.getItems(config)
         );
         setupLifecycleListeners();
@@ -583,7 +583,9 @@ public class ParsableGui extends PaginatedGui {
     public Item applyPlaceholders(Item item) {
         Item copy = item.clone();
 
-        copy.displayName(applyPlaceholders(item.displayName(), item));
+        if (copy.displayName()!=null && !copy.displayName().isEmpty()) {
+            copy.displayName(applyPlaceholders(item.displayName(), item));
+        }
         copy.lore(applyPlaceholders(item.lore(), item));
         copy.viewRequirements(applyPlaceholders(item.viewRequirements(), item));
 
