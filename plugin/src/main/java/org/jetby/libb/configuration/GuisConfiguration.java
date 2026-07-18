@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetby.libb.Libb;
 import org.jetby.libb.LibbApi;
+import org.jetby.libb.action.ActionUtil;
 import org.jetby.libb.action.record.ActionBlock;
 import org.jetby.libb.action.record.Expression;
 import org.jetby.libb.command.CommandRegistrar;
@@ -59,9 +60,9 @@ public class GuisConfiguration {
             String title = config.getString("title");
             int size = config.getInt("size");
             List<String> command = config.getStringList("command");
-            List<Expression> preOpenExpressions = ParseUtil.getExpressions(config.getStringList("pre_open"));
-            ActionBlock onOpen = ParseUtil.getActionBlock(config, "on_open");
-            ActionBlock onClose = ParseUtil.getActionBlock(config, "on_close");
+            List<Expression> preOpenExpressions = ActionUtil.getExpressions(config.getStringList("pre_open"));
+            ActionBlock onOpen = ActionUtil.getActionBlock(config, "on_open");
+            ActionBlock onClose = ActionUtil.getActionBlock(config, "on_close");
             List<Item> items = ParseUtil.getItems(config);
 
             for (String cmd : command) {
