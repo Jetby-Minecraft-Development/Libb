@@ -51,7 +51,7 @@ public class ActionContext {
         return toReplace;
     }
 
-    private ActionContext() {
+    public ActionContext() {
         this.player = null;
     }
 
