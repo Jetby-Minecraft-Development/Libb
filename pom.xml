@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>1.2.2</revision>
+        <revision>1.2.3</revision>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,7 +48,7 @@
     </build>
     <distributionManagement>
         <repository>
-            <id>jetby-api</id>
+            <id>JetbyMC</id>
             <url>https://api.jetby.org/upload/</url>
         </repository>
     </distributionManagement>

@@ -51,7 +51,7 @@
 
     <distributionManagement>
         <repository>
-            <id>jetby-api</id>
+            <id>JetbyMC</id>
             <url>https://api.jetby.org/upload/</url>
         </repository>
     </distributionManagement>
