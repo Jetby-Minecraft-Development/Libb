@@ -66,6 +66,13 @@ public final class ActionExecute {
         handler.execute(ctx, new ActionInput(text, component));
     }
 
+    public static void run(@NotNull String line) {
+        run(new ActionContext(), line, null);
+    }
+
+    public static void run(@NotNull List<String> list) {
+        ActionUtil.scheduleChain(new ActionContext(), new ArrayList<>(list), 0, 0);
+    }
     public static void run(@NotNull ActionContext ctx, @NotNull String line) {
         run(ctx, line, null);
     }
