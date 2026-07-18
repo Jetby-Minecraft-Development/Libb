@@ -2,12 +2,21 @@ package org.jetby.libb.action;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetby.libb.action.record.ActionBlock;
 import org.jetby.libb.action.record.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class ActionUtil {
 
@@ -139,5 +148,92 @@ public class ActionUtil {
             case "!=" -> !left.equals(right);
             default -> false;
         };
+    }
+
+
+
+    public static ActionBlock getActionBlock(List<?> list) {
+        if (list == null) return null;
+        List<String> staticActions = new ArrayList<>();
+        List<Expression> expressions = new ArrayList<>();
+
+        for (Object object : list) {
+
+            if (object instanceof String string) {
+                staticActions.add(string);
+                continue;
+            }
+
+            // - example_check: { ... }
+            if (object instanceof Map<?, ?> map) {
+                for (Map.Entry<?, ?> entry : map.entrySet()) {
+
+                    String key = String.valueOf(entry.getKey());
+
+                    if (!(entry.getValue() instanceof Map<?, ?> sectionMap)) {
+                        continue;
+                    }
+
+                    ConfigurationSection section =
+                            new MemoryConfiguration().createSection(key, sectionMap);
+
+                    String expression = section.getString("if");
+                    if (expression == null) {
+                        continue;
+                    }
+
+                    List<String> success = section.getStringList("then");
+                    List<String> fail = section.getStringList("else");
+
+                    expressions.add(new Expression(expression, success, fail));
+                }
+            }
+        }
+
+        return new ActionBlock(staticActions, expressions);
+    }
+
+    public static @NotNull List<Expression> getExpressions(@NotNull List<?> list) {
+        List<Expression> expressions = new ArrayList<>();
+        for (Object object : list) {
+            parseExpression(object).ifPresent(expressions::add);
+        }
+        return expressions;
+    }
+
+    public static @NotNull Optional<Expression> parseExpression(@Nullable Object object) {
+        if (!(object instanceof Map<?, ?> map) || map.isEmpty()) {
+            return Optional.empty();
+        }
+
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (!(entry.getValue() instanceof Map<?, ?> sectionMap)) {
+                continue;
+            }
+
+            String key = String.valueOf(entry.getKey());
+            ConfigurationSection section = new MemoryConfiguration().createSection(key, sectionMap);
+
+            String expression = section.getString("if");
+            if (expression == null || expression.isBlank()) {
+//                Logger.warn( "Expression block '" + key + "' is missing 'if' field, skipping.");
+                continue;
+            }
+
+            List<String> success = section.getStringList("then");
+            List<String> fail = section.getStringList("else");
+
+            return Optional.of(new Expression(expression, success, fail));
+        }
+
+        return Optional.empty();
+    }
+
+    public static ActionBlock getActionBlock(@NotNull Configuration configuration, String path) {
+        return getActionBlock(configuration.getList(path));
+    }
+
+    public static ActionBlock getActionBlock(ConfigurationSection configuration, String path) {
+        return getActionBlock(configuration.getList(path));
     }
 }
