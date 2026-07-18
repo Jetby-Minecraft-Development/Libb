@@ -52,8 +52,6 @@ public class AdvancedGui implements InventoryHolder {
 
     public Player player;
 
-    private final Map<String, Function<Player, String>> placeholders = new LinkedHashMap<>();
-
     private static Inventory createInventory(InventoryHolder holder, int size, Component title) {
         if (LibbApi.Settings.PLATFORM == Platform.PAPER) {
             return Bukkit.createInventory(holder, size, title);
@@ -156,6 +154,7 @@ public class AdvancedGui implements InventoryHolder {
         }
 
         for (int slot : wrapper.slots()) {
+            if (slot<0 || slot> 53) continue;
             inventory.setItem(slot, itemStack);
         }
         wrappers.put(key, wrapper);
